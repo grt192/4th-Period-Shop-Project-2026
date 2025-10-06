@@ -39,7 +39,7 @@ public class DriveSubsystem extends SubsystemBase {
     rightBack.setInverted(true);
 
     // Create differential drive with front motors as leaders
-    drive = new DifferentialDrive(leftFront, rightFront);
+    drive = new DifferentialDrive(rightFront, leftFront);
     drive.setSafetyEnabled(false);
   }
 
