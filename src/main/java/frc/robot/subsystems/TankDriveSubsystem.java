@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class TankDriveSubsystem extends SubsystemBase {
 
   // motors
-  private final WPI_TalonSRX leftFront  = new WPI_TalonSRX(3);
-  private final WPI_TalonSRX leftBack   = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX rightFront = new WPI_TalonSRX(14);
-  private final WPI_TalonSRX rightBack  = new WPI_TalonSRX(15);
+  private final WPI_TalonSRX leftFront  = new WPI_TalonSRX(2);
+  private final WPI_TalonSRX leftBack   = new WPI_TalonSRX(1);
+  private final WPI_TalonSRX rightFront = new WPI_TalonSRX(18);
+  private final WPI_TalonSRX rightBack  = new WPI_TalonSRX(4);
 
   public TankDriveSubsystem() {
     // config left
