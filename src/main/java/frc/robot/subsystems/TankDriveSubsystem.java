@@ -7,14 +7,15 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveConstants;
 
 public class TankDriveSubsystem extends SubsystemBase {
 
   // motors
-  private final WPI_TalonSRX leftFront  = new WPI_TalonSRX(2);
-  private final WPI_TalonSRX leftBack   = new WPI_TalonSRX(1);
-  private final WPI_TalonSRX rightFront = new WPI_TalonSRX(18);
-  private final WPI_TalonSRX rightBack  = new WPI_TalonSRX(4);
+  private final WPI_TalonSRX leftFront  = new WPI_TalonSRX(DriveConstants.left_front_motor_id);
+  private final WPI_TalonSRX leftBack   = new WPI_TalonSRX(DriveConstants.left_back_motor_id);
+  private final WPI_TalonSRX rightFront = new WPI_TalonSRX(DriveConstants.right_front_motor_id);
+  private final WPI_TalonSRX rightBack  = new WPI_TalonSRX(DriveConstants.right_back_motor_id);
 
   public TankDriveSubsystem() {
     // config left
