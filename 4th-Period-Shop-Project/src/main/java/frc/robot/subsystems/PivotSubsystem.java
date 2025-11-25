@@ -11,6 +11,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.networktables.DoublePublisher;
@@ -84,9 +85,13 @@ public class PivotSubsystem extends SubsystemBase {
     config.Slot0.kP = PivotConstants.kP;
     config.Slot0.kI = PivotConstants.kI;
     config.Slot0.kD = PivotConstants.kD;
-    config.Slot0.kV = PivotConstants.kF;
+    config.Slot0.kV = PivotConstants.kV;
+    config.Slot0.kG = PivotConstants.kG;
 
-    // Motion Magic configuration (trying this out dont know if will work)
+    // Gravity compensation
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+
+    // Motion Magic configuration
     config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.MAX_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCELERATION;
 
@@ -163,7 +168,14 @@ public class PivotSubsystem extends SubsystemBase {
     // Convert degrees to motor rotations
     double motorRotations = (angleDegrees * PivotConstants.GEAR_RATIO) / 360.0;
 
-    leftKraken.setControl(positionControl.withPosition(motorRotations));
+    // Calculate gravity feedforward position offset (horizontal position in rotations)
+    double horizontalRotations = (PivotConstants.HORIZONTAL_ANGLE_DEGREES * PivotConstants.GEAR_RATIO) / 360.0;
+
+    // Use PositionVoltage with gravity feedforward
+    leftKraken.setControl(positionControl
+        .withPosition(motorRotations)
+        .withFeedForward(0) // Additional arbitrary feedforward if needed
+        .withSlot(PivotConstants.PID_SLOT));
 
     // Log target angle
     targetAnglePublisher.set(angleDegrees);

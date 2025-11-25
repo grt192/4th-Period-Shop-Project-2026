@@ -57,7 +57,12 @@ public final class Constants {
     public static final double kP = 0.1;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-    public static final double kF = 0.0;
+    public static final double kV = 0.0; // Velocity feedforward
+    public static final double kG = 0.0; // Gravity feedforward (TODO: Tune this value)
+
+    // Gravity Compensation
+    // Horizontal angle in degrees (where maximum gravity compensation is needed)
+    public static final double HORIZONTAL_ANGLE_DEGREES = 0.0; // TODO: Set to horizontal position
 
     // Motion Magic / Profile Constants
     public static final double MAX_VELOCITY = 1.0; // rotations per second
