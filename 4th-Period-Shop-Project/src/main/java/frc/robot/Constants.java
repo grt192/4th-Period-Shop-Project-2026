@@ -66,15 +66,15 @@ public final class Constants {
 
     // Motion Magic / Profile Constants
     public static final double MAX_VELOCITY = 1.0; // rotations per second
-    public static final double MAX_ACCELERATION = 2.0; // rotations per second squared
+    public static final double MAX_ACCELERATION = 2.0; 
 
     // Current Limits
     public static final int CURRENT_LIMIT = 40; // amps
     public static final int TRIGGER_THRESHOLD_CURRENT = 60; // amps
     public static final double TRIGGER_THRESHOLD_TIME = 0.1; // seconds
 
-    // Manual Control
-    public static final double MANUAL_SPEED = 0.3; // Percent output for manual control
+    // Manual Control (Torque Current)
+    public static final double MANUAL_TORQUE_CURRENT = 20.0; // Amps for manual control (TODO: Tune this value)
 
     // Preset Positions (in degrees)
     public static final double POSITION_1 = 15.0; // TODO: Update with actual position

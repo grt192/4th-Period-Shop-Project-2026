@@ -6,11 +6,12 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -37,9 +38,9 @@ public class PivotSubsystem extends SubsystemBase {
   private final DigitalInput topLimitSwitch = new DigitalInput(PivotConstants.TOP_LIMIT_SWITCH_DIO);
   private final DigitalInput bottomLimitSwitch = new DigitalInput(PivotConstants.BOTTOM_LIMIT_SWITCH_DIO);
 
-  // Control requests
-  private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
-  private final PositionVoltage positionControl = new PositionVoltage(0);
+  // Control requests (Pro licensed - TorqueCurrentFOC)
+  private final TorqueCurrentFOC torqueControl = new TorqueCurrentFOC(0);
+  private final MotionMagicTorqueCurrentFOC positionControl = new MotionMagicTorqueCurrentFOC(0);
 
   // Track previous limit switch states 
   private boolean previousBottomLimitState = false;
@@ -94,6 +95,20 @@ public class PivotSubsystem extends SubsystemBase {
     // Motion Magic configuration
     config.MotionMagic.MotionMagicCruiseVelocity = PivotConstants.MAX_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = PivotConstants.MAX_ACCELERATION;
+
+    // Use CANcoder as feedback sensor
+    config.Feedback.FeedbackRemoteSensorID = PivotConstants.THROUGHBORE_ENCODER_ID;
+    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    config.Feedback.SensorToMechanismRatio = PivotConstants.GEAR_RATIO;
+    config.Feedback.RotorToSensorRatio = 1.0;
+
+    // Soft Limits (calculated from min/max angles)
+    double minRotations = (PivotConstants.MIN_ANGLE_DEGREES * PivotConstants.GEAR_RATIO) / 360.0;
+    double maxRotations = (PivotConstants.MAX_ANGLE_DEGREES * PivotConstants.GEAR_RATIO) / 360.0;
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxRotations;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minRotations;
 
     // Current limits
     config.CurrentLimits.SupplyCurrentLimit = PivotConstants.CURRENT_LIMIT;
@@ -168,13 +183,9 @@ public class PivotSubsystem extends SubsystemBase {
     // Convert degrees to motor rotations
     double motorRotations = (angleDegrees * PivotConstants.GEAR_RATIO) / 360.0;
 
-    // Calculate gravity feedforward position offset (horizontal position in rotations)
-    double horizontalRotations = (PivotConstants.HORIZONTAL_ANGLE_DEGREES * PivotConstants.GEAR_RATIO) / 360.0;
-
-    // Use PositionVoltage with gravity feedforward
+    // Use MotionMagicTorqueCurrentFOC for smooth, voltage-independent position control
     leftKraken.setControl(positionControl
         .withPosition(motorRotations)
-        .withFeedForward(0) // Additional arbitrary feedforward if needed
         .withSlot(PivotConstants.PID_SLOT));
 
     // Log target angle
@@ -184,25 +195,29 @@ public class PivotSubsystem extends SubsystemBase {
 
   /**
    * Manual control of pivot with limit switch protection
-   * @param speed Percent output (-1.0 to 1.0), positive = up, negative = down
+   * @param speed Percent input (-1.0 to 1.0), positive = up, negative = down
    */
   public void setManualSpeed(double speed) {
+    // Convert speed percentage to torque current (amps)
+    double torqueCurrent = speed * PivotConstants.MANUAL_TORQUE_CURRENT;
+
     // Limit switch protection
-    if (isAtTopLimit() && speed > 0) {
-      speed = 0;
+    if (isAtTopLimit() && torqueCurrent > 0) {
+      torqueCurrent = 0;
     }
-    if (isAtBottomLimit() && speed < 0) {
-      speed = 0;
+    if (isAtBottomLimit() && torqueCurrent < 0) {
+      torqueCurrent = 0;
     }
 
-    leftKraken.setControl(dutyCycleControl.withOutput(speed));
+    // Use TorqueCurrentFOC for direct torque control
+    leftKraken.setControl(torqueControl.withOutput(torqueCurrent));
   }
 
   /**
    * Stop the pivot
    */
   public void stop() {
-    leftKraken.setControl(dutyCycleControl.withOutput(0));
+    leftKraken.setControl(torqueControl.withOutput(0));
   }
 
   /**
