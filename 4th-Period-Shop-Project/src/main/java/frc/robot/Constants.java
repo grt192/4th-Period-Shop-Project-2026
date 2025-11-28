@@ -30,7 +30,41 @@ public final class Constants {
     public static final int TRIGGER_THRESHOLD_CURRENT = 45; // amps
     public static final double TRIGGER_THRESHOLD_TIME = 0.5; // seconds
   }
+public static final class PivotConstants {
 
+  // Motors
+  public static final int PIVOT_MOTOR_LEFT_ID = 1;  //placeholder
+  public static final int PIVOT_MOTOR_RIGHT_ID = 2; //placeholder
+
+  // Limit switches
+  public static final int MIN_LIMIT_SWITCH_ID = 0;  //placeholder
+  public static final int MAX_LIMIT_SWITCH_ID = 1; //placeholder
+
+  // PID constants
+
+  public static final double PIVOT_P = 0.01; 
+  public static final double PIVOT_I = 0.0; 
+  public static final double PIVOT_D = 0.0;
+  public static final double PIVOT_F = 0.0;
+
+  public static final int ENCODER_ID = 0;
+  public static final double PIVOT_SPEED = 0.3;
+  
+  public static final double MAX_ANGLE = 0.0;  
+  public static final double MIN_ANGLE = 90.0;   
+  
+  public static final double GEAR_RATIO = 0; // update with real value
+
+  // Pivot Positions (UPDATE PLACEHOLDERS!!)
+  public static final double MAX_POSITION = 0;
+  public static final double INTAKE_POSITION = 0;
+  public static final double MIN_POSITION = 0;
+  public static final double POSITION_TOLERANCE = 1.5;
+
+
+  
+  
+}
   public static final class OIConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
   }
