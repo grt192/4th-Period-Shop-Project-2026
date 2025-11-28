@@ -60,11 +60,12 @@ public static final class PivotConstants {
   public static final double INTAKE_POSITION = 0;
   public static final double MIN_POSITION = 0;
   public static final double POSITION_TOLERANCE = 1.5;
-
-
-  
-  
 }
+public static final class PneumaticsConstants {
+  public static final int pneumaticID = 0;
+  public static final int pneumaticCANId = 0;
+}
+  
   public static final class OIConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
   }
