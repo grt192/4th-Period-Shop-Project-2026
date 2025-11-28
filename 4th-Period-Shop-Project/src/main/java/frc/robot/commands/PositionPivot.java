@@ -8,11 +8,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.PivotConstants;
 import frc.robot.subsystems.PivotSubsystem;
 
-public class PosPivot extends Command {
+public class PositionPivot extends Command {
   private final PivotSubsystem pivotSubsystem;
   private final double targetAngle;
 
-  public PosPivot(PivotSubsystem pivotSubsystem, double targetAngle) {
+  public PositionPivot(PivotSubsystem pivotSubsystem, double targetAngle) {
     this.pivotSubsystem = pivotSubsystem;
     this.targetAngle = targetAngle;
     addRequirements(pivotSubsystem);

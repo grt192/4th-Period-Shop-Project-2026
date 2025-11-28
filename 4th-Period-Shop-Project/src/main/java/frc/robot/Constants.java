@@ -65,6 +65,24 @@ public static final class PneumaticsConstants {
   public static final int pneumaticID = 0;
   public static final int pneumaticCANId = 0;
 }
+
+public static final class IntakeConstants {
+  public static final int SERVO_ID = 0;
+
+  // to update opem/closed positions
+  public static final double CLOSED_POSITION = 0.0; 
+  public static final double OPEN_POSITION = 0.8; 
+  
+  public static final double MAX_POSITION = 1.0; 
+  public static final double MIN_POSITION = 0.0;
+  public static final double INTAKE_TOLERANCE = 0.05; // 9 degrees
+
+  public static final double INTAKE_SPEED = 0.02;
+
+  public static final double SERVO_POSITION = 0; //to update 
+
+  
+}
   
   public static final class OIConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
