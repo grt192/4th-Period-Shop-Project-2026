@@ -1,14 +1,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.IntakeConstants;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.Constants.ServoConstants;
+import frc.robot.subsystems.StopperServo;
 
-public class PositionIntake extends Command {
-    private final IntakeSubsystem intakeSubsystem;
+public class PositionServo extends Command {
+    private final StopperServo intakeSubsystem;
     private final double targetPosition;
     
-    public PositionIntake(IntakeSubsystem intakeSubsystem, double targetPosition) {
+    public PositionServo(StopperServo intakeSubsystem, double targetPosition) {
         this.intakeSubsystem = intakeSubsystem;
         this.targetPosition = targetPosition;
         addRequirements(intakeSubsystem);
@@ -21,6 +21,6 @@ public class PositionIntake extends Command {
     
     @Override
     public boolean isFinished() {
-        return (Math.abs(intakeSubsystem.getPosition() - targetPosition) < IntakeConstants.INTAKE_TOLERANCE);
+        return (Math.abs(intakeSubsystem.getPosition() - targetPosition) < ServoConstants.INTAKE_TOLERANCE);
     }
 }

@@ -9,15 +9,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ServoConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.PivotConstants;
-import frc.robot.commands.ManualIntake;
+import frc.robot.commands.ManualServo;
 import frc.robot.commands.ManualPivot;
-import frc.robot.commands.PositionIntake;
+import frc.robot.commands.PositionServo;
 import frc.robot.commands.PositionPivot;
 import frc.robot.subsystems.TankDriveSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.StopperServo;
 import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.PneumaticsSubsystem;
 
@@ -26,7 +26,7 @@ public class RobotContainer {
   private final TankDriveSubsystem tankDrive= new TankDriveSubsystem();
   private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
   private final PneumaticsSubsystem pneumaticSubsystem = new PneumaticsSubsystem();
-  private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private final StopperServo intakeSubsystem = new StopperServo();
 
 
   // Controllers
@@ -68,15 +68,15 @@ public class RobotContainer {
 
     //INTAKE: Create buttton (Ran out of buttons to use .. I know it's small but please change if a better button is available)
     driverController.create().onTrue(
-      new PositionIntake(intakeSubsystem, IntakeConstants.SERVO_POSITION) );
+      new PositionServo(intakeSubsystem, ServoConstants.SERVO_POSITION) );
     
     //Intake: R1 close L1 open
     driverController.R1().whileTrue(
-      new ManualIntake(intakeSubsystem, IntakeConstants.INTAKE_SPEED)
+      new ManualServo(intakeSubsystem, ServoConstants.INTAKE_SPEED)
     );
 
     driverController.L1().whileTrue(
-      new ManualIntake(intakeSubsystem, -IntakeConstants.INTAKE_SPEED)
+      new ManualServo(intakeSubsystem, -ServoConstants.INTAKE_SPEED)
     );
 }
   private void configureDefaultCommands() {

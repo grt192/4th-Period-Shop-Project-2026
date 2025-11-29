@@ -5,13 +5,13 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.StopperServo;
 
-public class ManualIntake extends Command {
-  private final IntakeSubsystem intakeSubsystem;
+public class ManualServo extends Command {
+  private final StopperServo intakeSubsystem;
   private final double speed;
 
-  public ManualIntake(IntakeSubsystem intakeSubsystem, double speed) {
+  public ManualServo(StopperServo intakeSubsystem, double speed) {
     this.intakeSubsystem = intakeSubsystem;
     this.speed = speed;
     addRequirements(intakeSubsystem);

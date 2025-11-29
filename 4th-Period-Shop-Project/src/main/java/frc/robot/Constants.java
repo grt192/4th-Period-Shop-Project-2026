@@ -49,7 +49,7 @@ public static final class PneumaticsConstants {
   public static final int pneumaticCANId = 0;
 }
 
-public static final class IntakeConstants {
+public static final class ServoConstants {
   public static final int SERVO_ID = 0;
 
   // to update opem/closed positions
