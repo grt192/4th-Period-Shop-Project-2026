@@ -33,8 +33,8 @@ public static final class PivotConstants {
   public static final int ENCODER_ID = 0;
   public static final double PIVOT_SPEED = 0.3;
   
-  public static final double MAX_ANGLE = 0.0;  
-  public static final double MIN_ANGLE = 90.0;   
+  public static final double MAX_ANGLE = 90.0;  
+  public static final double MIN_ANGLE = 0.0;   
   
   public static final double GEAR_RATIO = 0.8 ; // update with real value
 
