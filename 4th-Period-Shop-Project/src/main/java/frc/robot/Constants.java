@@ -53,7 +53,7 @@ public static final class PivotConstants {
   public static final double MAX_ANGLE = 0.0;  
   public static final double MIN_ANGLE = 90.0;   
   
-  public static final double GEAR_RATIO = 0; // update with real value
+  public static final double GEAR_RATIO = 0.8 ; // update with real value
 
   // Pivot Positions (UPDATE PLACEHOLDERS!!)
   public static final double MAX_POSITION = 0;
