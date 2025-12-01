@@ -21,6 +21,6 @@ public class PositionServo extends Command {
     
     @Override
     public boolean isFinished() {
-        return (Math.abs(intakeSubsystem.getPosition() - targetPosition) < ServoConstants.INTAKE_TOLERANCE);
+        return (Math.abs(intakeSubsystem.currentPosition() - targetPosition) < ServoConstants.INTAKE_TOLERANCE);
     }
 }
