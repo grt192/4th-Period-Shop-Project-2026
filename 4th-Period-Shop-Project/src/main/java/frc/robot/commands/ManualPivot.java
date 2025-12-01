@@ -12,6 +12,13 @@ public class ManualPivot extends Command {
   private final PivotSubsystem pivotSubsystem;
   private final DoubleSupplier speedSupplier;
 
+   /**
+   * Creates a new ManualPivot command
+   * 
+   * @param pivotSubsystem Pivot subsystem
+   * @param speedSupplier A supplier returning the desired speed (-1.0 to 1.0), in this case its R2 and L2
+   *                  
+   */
   public ManualPivot(PivotSubsystem pivotSubsystem, DoubleSupplier speedSupplier) {
     this.pivotSubsystem = pivotSubsystem;
     this.speedSupplier = speedSupplier;
@@ -24,6 +31,7 @@ public class ManualPivot extends Command {
 
   @Override
   public void execute() {
+    // Get the current speed value from R2 and L2
     double speedValue = speedSupplier.getAsDouble();
     pivotSubsystem.setManualSpeed(speedValue);
   }

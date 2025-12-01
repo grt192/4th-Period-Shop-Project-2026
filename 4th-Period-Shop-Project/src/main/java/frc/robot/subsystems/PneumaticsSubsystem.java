@@ -10,9 +10,14 @@ public class PneumaticsSubsystem extends SubsystemBase {
             Constants.PneumaticsConstants.pneumaticID);
             
     public PneumaticsSubsystem() {
+        // Starts with pneumatic retracted
         solenoid.set(false); 
     }
 
+       /**
+     * Toggles solenoid between extended and retracted 
+     * If extended, it'll retract & if retracted, it'll extend.
+     */
     public void togglePneumatic() {
         solenoid.toggle();
     }

@@ -11,19 +11,27 @@ public class ManualServo extends Command {
   private final StopperServo intakeSubsystem;
   private final double speed;
 
+  /**
+   * Creates new ManualServo command
+   * 
+   * @param intakeSubsystem The stopper servo subsystem to control
+   * @param speed The speed/direction to move the servo (-1.0 to 1.0)
+   */
   public ManualServo(StopperServo intakeSubsystem, double speed) {
     this.intakeSubsystem = intakeSubsystem;
     this.speed = speed;
     addRequirements(intakeSubsystem);
   }
 
+
   @Override
   public void initialize() {
   }
-
+  
   @Override
   public void execute() {
     intakeSubsystem.move(speed);
+    // Continuously moves servo at the specified speed 
   }
 
   @Override
