@@ -111,7 +111,8 @@ public class PivotSubsystem extends SubsystemBase {
     angleDegrees = Math.max(PivotConstants.MIN_ANGLE,
                            Math.min(PivotConstants.MAX_ANGLE, angleDegrees));
 
-    double motorRotations = (angleDegrees * PivotConstants.GEAR_RATIO) / 360.0;
+    double motorRotations = (angleDegrees / 360.0) * PivotConstants.GEAR_RATIO;
+    // Get motor rotations 
 
     leftKraken.setControl(positionControl.withPosition(motorRotations));
   }
