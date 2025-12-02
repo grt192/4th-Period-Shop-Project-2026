@@ -20,7 +20,7 @@ public class TankDriveSubsystem extends SubsystemBase {
   public TankDriveSubsystem() {
     // config left
     leftBack.follow(leftFront);
-    setNeutralMode(leftFront, leftBack, NeutralMode.Brake);
+    setNeutralMode(leftFront, leftBack, NeutralMode.Coast);
 
     // config right
     rightBack.follow(rightFront);
