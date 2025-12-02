@@ -26,7 +26,7 @@ public class RobotContainer {
   private final TankDriveSubsystem tankDrive= new TankDriveSubsystem();
   private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
   private final PneumaticsSubsystem pneumaticSubsystem = new PneumaticsSubsystem();
-  private final StopperServo stopperServo = new StopperServo();
+  private final StopperServo intakeSubsystem = new StopperServo();
 
 
   // Controllers
@@ -66,32 +66,29 @@ public class RobotContainer {
       new InstantCommand(() -> pneumaticSubsystem.togglePneumatic(), pneumaticSubsystem)
     );
 
-    // SERVO: Create buttton (Ran out of buttons to use .. I know it's small but please change if a better button is available)
+    //INTAKE: Create buttton (Ran out of buttons to use .. I know it's small but please change if a better button is available)
     driverController.create().onTrue(
-      new PositionServo(stopperServo, ServoConstants.SERVO_POSITION) );
+      new PositionServo(intakeSubsystem, ServoConstants.SERVO_POSITION) );
     
-    // SERVO: R1 close position
+    //Intake: R1 close L1 open
     driverController.R1().whileTrue(
-      new ManualServo(stopperServo, ServoConstants.INTAKE_SPEED)
+      new ManualServo(intakeSubsystem, ServoConstants.INTAKE_SPEED)
     );
-    // SERVO: L1 Open position
+
     driverController.L1().whileTrue(
-      new ManualServo(stopperServo, -ServoConstants.INTAKE_SPEED)
+      new ManualServo(intakeSubsystem, -ServoConstants.INTAKE_SPEED)
     );
 }
   private void configureDefaultCommands() {
-    // Set tank drive as default command
-    // Left stick Y-axis for forward/backward, right stick X-axis for rotation
     tankDrive.setDefaultCommand(new RunCommand(() -> {
-      this.joyConLeft = driverController.getLeftY(); // Forward / backward
-      this.joyConRight = driverController.getRightX(); // Rotation
+      this.joyConLeft = driverController.getLeftY();
+      this.joyConRight = driverController.getRightX(); 
       tankDrive.altDrive(joyConLeft, joyConRight);
     }, tankDrive));
   
     // Pivot Configs: R2 for pivot up and L2 for pivot down
       pivotSubsystem.setDefaultCommand(
-      new ManualPivot(pivotSubsystem, 
-      () -> driverController.getR2Axis() - driverController.getL2Axis()
+      new ManualPivot(pivotSubsystem, () -> driverController.getR2Axis() - driverController.getL2Axis()
       )
     );
 

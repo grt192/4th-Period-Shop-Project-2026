@@ -86,7 +86,7 @@ public class PivotSubsystem extends SubsystemBase {
    * @return Current angle in degrees
    */
   public double getAngleDegrees() {
-    return canCoder.getPosition().getValueAsDouble() * 360.0 / PivotConstants.GEAR_RATIO;
+    return canCoder.getPosition().getValueAsDouble();
   }
 
 
