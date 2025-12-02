@@ -5,14 +5,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.PivotConstants;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.PivotSubsystem;
 
-public class SetPivotPosition extends Command {
-  private final PivotSubsystem pivotSubsystem;
-  private final double targetAngle;
-
+/**
+ * Instant command to set pivot to a target angle.
+ * Motor controller maintains position with closed-loop control.
+ * Returns control to default command (manual) immediately.
+ */
+public class SetPivotPosition extends InstantCommand {
   /**
    * Creates a new SetPivotPosition command.
    *
@@ -20,36 +21,12 @@ public class SetPivotPosition extends Command {
    * @param targetAngle Target angle in degrees
    */
   public SetPivotPosition(PivotSubsystem pivotSubsystem, double targetAngle) {
-    this.pivotSubsystem = pivotSubsystem;
-    this.targetAngle = targetAngle;
-
-    addRequirements(pivotSubsystem);
-  }
-
-  @Override
-  public void initialize() {
-    pivotSubsystem.setAngle(targetAngle);
-    DataLogManager.log("SetPivotPosition command started: target=" + targetAngle + "°");
-  }
-
-  @Override
-  public void execute() {
-    // PID control is handled by the motor controller
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    // Keep holding position (don't stop)
-    if (interrupted) {
-      DataLogManager.log("SetPivotPosition command interrupted at " + pivotSubsystem.getAngleDegrees() + "°");
-    } else {
-      DataLogManager.log("SetPivotPosition command finished at target " + targetAngle + "°");
-    }
-  }
-
-  @Override
-  public boolean isFinished() {
-    // Command finishes when pivot reaches target position
-    return Math.abs(pivotSubsystem.getAngleDegrees() - targetAngle) < PivotConstants.POSITION_TOLERANCE;
+    super(
+      () -> {
+        pivotSubsystem.setAngle(targetAngle);
+        DataLogManager.log("SetPivotPosition: target=" + targetAngle + "°");
+      },
+      pivotSubsystem
+    );
   }
 }

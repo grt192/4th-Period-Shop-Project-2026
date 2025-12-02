@@ -15,15 +15,30 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.CANcoderSimState;
+import com.ctre.phoenix6.sim.ChassisReference;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PivotConstants;
+import frc.robot.Robot;
 
 
 public class PivotSubsystem extends SubsystemBase {
@@ -59,9 +74,35 @@ public class PivotSubsystem extends SubsystemBase {
   private final DoublePublisher targetAnglePublisher;
   private final StringPublisher statusPublisher;
 
+  // Simulation objects (only created if Robot.isSimulation())
+  private SingleJointedArmSim armSim;
+  private TalonFXSimState leftKrakenSim;
+  private TalonFXSimState rightKrakenSim;
+  private CANcoderSimState canCoderSim;
+  private DIOSim topLimitSwitchSim;
+  private DIOSim bottomLimitSwitchSim;
+
+  // Mechanism2d visualization
+  private final Mechanism2d mechanism;
+  private final MechanismRoot2d pivotRoot;
+  private final MechanismLigament2d pivotArm;
+
   public PivotSubsystem() {
     configureMotors();
     configureEncoder();
+
+    // Create Mechanism2d visualization (3m x 3m canvas)
+    mechanism = new Mechanism2d(3, 3);
+    // Root at bottom center (1.5m from left, 0.5m from bottom)
+    pivotRoot = mechanism.getRoot("pivot", 1.5, 0.5);
+    // Arm ligament - scale up by 3x for better visibility (visual only, doesn't affect physics)
+    double visualLength = PivotConstants.ARM_LENGTH_METERS * 3.0;
+    pivotArm = pivotRoot.append(
+        new MechanismLigament2d("arm", visualLength,
+        PivotConstants.MIN_ANGLE_DEGREES, 6, new Color8Bit(Color.kOrange))
+    );
+    // Publish to SmartDashboard
+    SmartDashboard.putData("Pivot Mechanism", mechanism);
 
     // Initialize NetworkTables publishers for logging
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -77,6 +118,11 @@ public class PivotSubsystem extends SubsystemBase {
     rightMotorVoltagePublisher = pivotTable.getDoubleTopic("RightMotorVoltage").publish();
     targetAnglePublisher = pivotTable.getDoubleTopic("TargetAngle").publish();
     statusPublisher = pivotTable.getStringTopic("Status").publish();
+
+    // Initialize simulation
+    if (Robot.isSimulation()) {
+      setupSimulation();
+    }
   }
 
   private void configureMotors() {
@@ -317,5 +363,102 @@ public class PivotSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Pivot/Right Motor Current", rightCurrent);
     SmartDashboard.putNumber("Pivot/Left Motor Voltage", leftVoltage);
     SmartDashboard.putNumber("Pivot/Right Motor Voltage", rightVoltage);
+
+    // Update Mechanism2d visualization
+    pivotArm.setAngle(currentAngle);
+  }
+
+  /**
+   * Setup simulation objects for the pivot arm
+   */
+  private void setupSimulation() {
+    // Create arm physics simulator with accurate modeling
+    armSim = new SingleJointedArmSim(
+        DCMotor.getKrakenX60Foc(2),  // 2x Kraken X60 FOC motors
+        PivotConstants.GEAR_RATIO,
+        PivotConstants.ARM_MOI_KG_M2,  // Moment of inertia
+        PivotConstants.ARM_LENGTH_METERS,  // Arm length to center of mass
+        Math.toRadians(PivotConstants.MIN_ANGLE_DEGREES),  // Min angle in radians
+        Math.toRadians(PivotConstants.MAX_ANGLE_DEGREES),  // Max angle in radians
+        true,  // Simulate gravity
+        Math.toRadians(PivotConstants.MIN_ANGLE_DEGREES)  // Start at bottom position
+    );
+
+    // Get CTRE simulation state objects
+    leftKrakenSim = leftKraken.getSimState();
+    rightKrakenSim = rightKraken.getSimState();
+    canCoderSim = canCoder.getSimState();
+
+    // Set orientation for accurate simulation
+    leftKrakenSim.Orientation = ChassisReference.CounterClockwise_Positive;
+
+    // Setup limit switch simulators
+    topLimitSwitchSim = new DIOSim(topLimitSwitch);
+    bottomLimitSwitchSim = new DIOSim(bottomLimitSwitch);
+
+    DataLogManager.log("Pivot simulation initialized");
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    if (armSim == null) return; // Safety check
+
+    // 1. Set supply voltage for all simulated devices
+    double batteryVoltage = RobotController.getBatteryVoltage();
+    leftKrakenSim.setSupplyVoltage(batteryVoltage);
+    rightKrakenSim.setSupplyVoltage(batteryVoltage);
+    canCoderSim.setSupplyVoltage(batteryVoltage);
+
+    // 2. Get commanded motor voltage from left TalonFX (leader)
+    double motorVoltage = leftKrakenSim.getMotorVoltage();
+
+    // 3. Update physics simulation with motor voltage
+    armSim.setInputVoltage(motorVoltage);
+    armSim.update(0.020); // 20ms loop time
+
+    // 4. Convert arm simulation state to motor/encoder units
+    double armAngleRads = armSim.getAngleRads();
+    double armVelocityRadPerSec = armSim.getVelocityRadPerSec();
+
+    // Convert radians to rotations (CANcoder native unit)
+    double armAngleRotations = armAngleRads / (2 * Math.PI);
+    double armVelocityRPS = armVelocityRadPerSec / (2 * Math.PI);
+
+    // Account for gear ratio to get motor positions
+    double motorRotations = armAngleRotations * PivotConstants.GEAR_RATIO;
+    double motorVelocityRPS = armVelocityRPS * PivotConstants.GEAR_RATIO;
+
+    // 5. Update TalonFX simulation states (both leader and follower)
+    leftKrakenSim.setRawRotorPosition(motorRotations);
+    leftKrakenSim.setRotorVelocity(motorVelocityRPS);
+    rightKrakenSim.setRawRotorPosition(motorRotations);
+    rightKrakenSim.setRotorVelocity(motorVelocityRPS);
+
+    // 6. Update CANcoder simulation state
+    canCoderSim.setRawPosition(motorRotations);
+    canCoderSim.setVelocity(motorVelocityRPS);
+
+    // 7. Simulate limit switches based on arm position
+    // Use built-in limit detection from SingleJointedArmSim for accuracy
+    boolean atBottomLimit = armSim.hasHitLowerLimit();
+    boolean atTopLimit = armSim.hasHitUpperLimit();
+
+    // Limit switches are normally open, active low (true = not pressed, false = pressed)
+    bottomLimitSwitchSim.setValue(!atBottomLimit);
+    topLimitSwitchSim.setValue(!atTopLimit);
+
+    // 8. Update battery simulation based on current draw from arm
+    RoboRioSim.setVInVoltage(
+        BatterySim.calculateDefaultBatteryLoadedVoltage(
+            armSim.getCurrentDrawAmps()
+        )
+    );
+
+    // 9. Add simulation debugging telemetry to SmartDashboard
+    SmartDashboard.putNumber("Sim/Arm Angle (deg)", Math.toDegrees(armAngleRads));
+    SmartDashboard.putNumber("Sim/Arm Current (A)", armSim.getCurrentDrawAmps());
+    SmartDashboard.putNumber("Sim/Motor Voltage", motorVoltage);
+    SmartDashboard.putBoolean("Sim/Bottom Limit Hit", atBottomLimit);
+    SmartDashboard.putBoolean("Sim/Top Limit Hit", atTopLimit);
   }
 }
