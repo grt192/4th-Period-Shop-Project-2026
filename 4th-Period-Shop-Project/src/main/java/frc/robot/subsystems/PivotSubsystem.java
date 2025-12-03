@@ -80,13 +80,11 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
    /**
-   * Gets the current pivot angle in degrees
-   * & converts from encoder rotations to degrees by dividing by the gear ratio
-   * 
+   * Converts encoder rotations to degrees by multiplying by 360
    * @return Current angle in degrees
    */
   public double getAngleDegrees() {
-    return canCoder.getPosition().getValueAsDouble();
+    return canCoder.getPosition().getValueAsDouble() * 360.0;
   }
 
 
@@ -146,7 +144,7 @@ public class PivotSubsystem extends SubsystemBase {
 
   // Set encoder position to the max angle
   public void setEncoderToMax() {
-    double maxRotations = (PivotConstants.MAX_ANGLE * PivotConstants.GEAR_RATIO) / 360.0;
+    double maxRotations = PivotConstants.MAX_ANGLE / 360.0;
     canCoder.setPosition(maxRotations);
   }
 
