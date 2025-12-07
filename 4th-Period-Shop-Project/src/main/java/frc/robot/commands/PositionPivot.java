@@ -27,11 +27,12 @@ public class PositionPivot extends Command {
 
    // Commands the pivot to move to the target angle with PID control
   public void initialize() {
-    pivotSubsystem.setAngle(targetAngle);
   }
 
   @Override
   public void execute() {
+    // Continuously command the target angle to maintain PID control until finished
+    pivotSubsystem.setAngle(targetAngle);
   }
 
   @Override

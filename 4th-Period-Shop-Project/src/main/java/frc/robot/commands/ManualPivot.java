@@ -14,15 +14,21 @@ public class ManualPivot extends Command {
 
    /**
    * Creates a new ManualPivot command
-   * 
+   *
    * @param pivotSubsystem Pivot subsystem
    * @param speedSupplier A supplier returning the desired speed (-1.0 to 1.0), in this case its R2 and L2
-   *                  
+   *
    */
   public ManualPivot(PivotSubsystem pivotSubsystem, DoubleSupplier speedSupplier) {
     this.pivotSubsystem = pivotSubsystem;
     this.speedSupplier = speedSupplier;
     addRequirements(pivotSubsystem);
+  }
+
+  @Override
+  public InterruptionBehavior getInterruptionBehavior() {
+    // This command can interrupt any other command using the pivot subsystem
+    return InterruptionBehavior.kCancelIncoming;
   }
 
   @Override
@@ -33,7 +39,9 @@ public class ManualPivot extends Command {
   public void execute() {
     // Get the current speed value from R2 and L2
     double speedValue = speedSupplier.getAsDouble();
-    pivotSubsystem.setManualSpeed(speedValue);
+    // Apply configured speed scaling for safer manual control
+    double scaledSpeed = speedValue * frc.robot.Constants.PivotConstants.PIVOT_MANUAL_SPEED;
+    pivotSubsystem.setManualSpeed(scaledSpeed);
   }
 
   @Override

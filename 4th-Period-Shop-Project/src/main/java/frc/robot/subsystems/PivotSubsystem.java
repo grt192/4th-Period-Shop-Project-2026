@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -13,7 +15,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PivotConstants;
 
@@ -22,9 +23,8 @@ public class PivotSubsystem extends SubsystemBase {
   private final TalonFX leftKraken = new TalonFX(PivotConstants.PIVOT_MOTOR_LEFT_ID, "can");
   private final TalonFX rightKraken = new TalonFX(PivotConstants.PIVOT_MOTOR_RIGHT_ID, "can");
 
-  // Limit Switches
-  private final DigitalInput topLimitSwitch = new DigitalInput(PivotConstants.MAX_LIMIT_SWITCH_ID);
-  private final DigitalInput bottomLimitSwitch = new DigitalInput(PivotConstants.MIN_LIMIT_SWITCH_ID);
+  // CANdle for limit switches
+  private final CANdle candle = new CANdle(PivotConstants.CANDLE_ID);
 
   // Encoder
   private final CANcoder canCoder = new CANcoder(PivotConstants.ENCODER_ID);
@@ -42,6 +42,7 @@ public class PivotSubsystem extends SubsystemBase {
   public PivotSubsystem() {
     configMotors();
     configEncoder();
+    configCANdle();
   }
 
   /**
@@ -79,6 +80,12 @@ public class PivotSubsystem extends SubsystemBase {
     canCoder.getConfigurator().apply(config);
   }
 
+  // Config CANdle (default settings)
+  private void configCANdle() {
+    CANdleConfiguration config = new CANdleConfiguration();
+    candle.configAllSettings(config);
+  }
+
    /**
    * Converts encoder rotations to degrees by multiplying by 360
    * @return Current angle in degrees
@@ -96,36 +103,41 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
   public boolean isAtTopLimit() {
-    // Prevent moving up if at top limit
-    return !topLimitSwitch.get();
+    // Read from CANdle DIO (channel for max limit switch)
+    return candle.getDigitalInput(PivotConstants.MAX_LIMIT_SWITCH_DIO);
   }
 
   public boolean isAtBottomLimit() {
-    // Prevent moving down if at bottom limit
-    return !bottomLimitSwitch.get(); 
+    // Read from CANdle DIO (channel for min limit switch)
+    return candle.getDigitalInput(PivotConstants.MIN_LIMIT_SWITCH_DIO);
   }
 
   public void setAngle(double angleDegrees) {
     angleDegrees = Math.max(PivotConstants.MIN_ANGLE,
                            Math.min(PivotConstants.MAX_ANGLE, angleDegrees));
 
-    double motorRotations = (angleDegrees / 360.0) * PivotConstants.GEAR_RATIO;
-    // Get motor rotations 
+    // Since encoder is on the pivot axle (after gearbox), convert degrees directly to encoder rotations
+    // Motor must rotate more due to gear ratio (motor_rotations = encoder_rotations / gear_ratio)
+    double encoderRotations = angleDegrees / 360.0;
+    double motorRotations = encoderRotations / PivotConstants.GEAR_RATIO;
 
     leftKraken.setControl(positionControl.withPosition(motorRotations));
   }
 
  /**
    * Manually controls the pivot at a specific speed
-   * Prevents pivot from moving past top & bottom limits
-   * 
-   * @param speed Desired speed from -1.0 to 1.0 
+   * Implements soft limits: prevents movement beyond physical limits OR encoder angle limits (0-45°)
+   *
+   * @param speed Desired speed from -1.0 to 1.0
    */
   public void setManualSpeed(double speed) {
-    if (isAtTopLimit() && speed > 0) {
+    double currentAngle = getAngleDegrees();
+
+    // Soft limits: stop if at physical limit switches OR encoder exceeds angle range
+    if ((isAtTopLimit() || currentAngle >= PivotConstants.MAX_ANGLE) && speed > 0) {
       speed = 0;
     }
-    if (isAtBottomLimit() && speed < 0) {
+    if ((isAtBottomLimit() || currentAngle <= PivotConstants.MIN_ANGLE) && speed < 0) {
       speed = 0;
     }
     // Command duty cycle to leader motor (leftKraken)
