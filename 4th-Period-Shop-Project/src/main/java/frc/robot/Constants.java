@@ -19,10 +19,6 @@ public static final class PivotConstants {
   public static final int PIVOT_MOTOR_LEFT_ID = 5;  // Changed from 1 to avoid conflict with left_back drive motor
   public static final int PIVOT_MOTOR_RIGHT_ID = 6; // Changed from 2 to avoid conflict with left_front drive motor
 
-  // Limit switches - DIO channels on CANdle
-  public static final int MIN_LIMIT_SWITCH_DIO = 0;  // CANdle DIO channel for bottom/min limit switch
-  public static final int MAX_LIMIT_SWITCH_DIO = 1;  // CANdle DIO channel for top/max limit switch
-
   // PID constants
 
   public static final double PIVOT_P = 0.01; 
@@ -31,7 +27,7 @@ public static final class PivotConstants {
   public static final double PIVOT_F = 0.0;
 
   public static final int ENCODER_ID = 0;
-  public static final int CANDLE_ID = 11; // CANdle CAN ID for limit switch DIO
+  public static final int CANDI_ID = 11; // CANdi (CANdleDigitalInput) CAN ID for limit switches
   public static final double PIVOT_MANUAL_SPEED = 0.15;  // Slow speed for manual control
 
   public static final double MAX_ANGLE = 45.0;

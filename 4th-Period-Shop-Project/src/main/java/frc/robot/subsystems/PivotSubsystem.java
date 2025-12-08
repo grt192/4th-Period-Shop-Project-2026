@@ -4,17 +4,20 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.led.CANdle;
-import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.core.CoreCANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitValue;
+import com.ctre.phoenix6.StatusCode;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PivotConstants;
 
@@ -23,8 +26,8 @@ public class PivotSubsystem extends SubsystemBase {
   private final TalonFX leftKraken = new TalonFX(PivotConstants.PIVOT_MOTOR_LEFT_ID, "can");
   private final TalonFX rightKraken = new TalonFX(PivotConstants.PIVOT_MOTOR_RIGHT_ID, "can");
 
-  // CANdle for limit switches
-  private final CANdle candle = new CANdle(PivotConstants.CANDLE_ID);
+  // CANdi for limit switches
+  private final CoreCANdi candi = new CoreCANdi(PivotConstants.CANDI_ID);
 
   // Encoder
   private final CANcoder canCoder = new CANcoder(PivotConstants.ENCODER_ID);
@@ -42,7 +45,7 @@ public class PivotSubsystem extends SubsystemBase {
   public PivotSubsystem() {
     configMotors();
     configEncoder();
-    configCANdle();
+    configLimitSwitches();
   }
 
   /**
@@ -80,10 +83,26 @@ public class PivotSubsystem extends SubsystemBase {
     canCoder.getConfigurator().apply(config);
   }
 
-  // Config CANdle (default settings)
-  private void configCANdle() {
-    CANdleConfiguration config = new CANdleConfiguration();
-    candle.configAllSettings(config);
+  /**
+   * Configures the CANdi limit switches on the left motor controller.
+   * Uses helper methods to configure remote limit switches:
+   * - Forward limit = max/top position (S2 input on CANdi)
+   * - Reverse limit = min/bottom position (S1 input on CANdi)
+   */
+  private void configLimitSwitches() {
+    HardwareLimitSwitchConfigs limitConfigs = new HardwareLimitSwitchConfigs();
+
+    // Configure reverse limit (min/bottom position) to use CANdi S1 input
+    limitConfigs.withReverseLimitRemoteCANdiS1(candi);
+
+    // Configure forward limit (max/top position) to use CANdi S2 input
+    limitConfigs.withForwardLimitRemoteCANdiS2(candi);
+
+    // Apply configuration to left motor (leader)
+    StatusCode status = leftKraken.getConfigurator().apply(limitConfigs);
+    if (!status.isOK()) {
+      System.err.println("Failed to apply CANdi limit switch configs: " + status.toString());
+    }
   }
 
    /**
@@ -103,13 +122,15 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
   public boolean isAtTopLimit() {
-    // Read from CANdle DIO (channel for max limit switch)
-    return candle.getDigitalInput(PivotConstants.MAX_LIMIT_SWITCH_DIO);
+    // Read forward limit state from motor controller (max/top position)
+    ForwardLimitValue forwardLimit = leftKraken.getForwardLimit().getValue();
+    return forwardLimit == ForwardLimitValue.ClosedToGround;
   }
 
   public boolean isAtBottomLimit() {
-    // Read from CANdle DIO (channel for min limit switch)
-    return candle.getDigitalInput(PivotConstants.MIN_LIMIT_SWITCH_DIO);
+    // Read reverse limit state from motor controller (min/bottom position)
+    ReverseLimitValue reverseLimit = leftKraken.getReverseLimit().getValue();
+    return reverseLimit == ReverseLimitValue.ClosedToGround;
   }
 
   public void setAngle(double angleDegrees) {
