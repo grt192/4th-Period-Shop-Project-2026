@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.PivotConstants;
 import frc.robot.subsystems.PivotSubsystem;
 import java.util.function.DoubleSupplier;
 
@@ -25,6 +26,12 @@ public class ManualPivot extends Command {
     addRequirements(pivotSubsystem);
   }
 
+  // Add interruption behavior to override any and all other commands usiong the pivot subsystem
+  @Override
+  public InterruptionBehavior getInterruptionBehavior() {
+    return InterruptionBehavior.kCancelIncoming;
+  }
+
   @Override
   public void initialize() {
   }
@@ -33,7 +40,8 @@ public class ManualPivot extends Command {
   public void execute() {
     // Get the current speed value from R2 and L2
     double speedValue = speedSupplier.getAsDouble();
-    pivotSubsystem.setManualSpeed(speedValue);
+    pivotSubsystem.setManualSpeed(speedValue * PivotConstants.MANUAL_PIVOT_SPEED);
+
   }
 
   @Override

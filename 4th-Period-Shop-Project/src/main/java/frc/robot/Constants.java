@@ -16,12 +16,13 @@ public final class Constants {
 public static final class PivotConstants {
 
   // Motors
-  public static final int PIVOT_MOTOR_LEFT_ID = 1;  //placeholder
-  public static final int PIVOT_MOTOR_RIGHT_ID = 2; //placeholder
+  public static final int PIVOT_MOTOR_LEFT_ID = 6;  //placeholder
+  public static final int PIVOT_MOTOR_RIGHT_ID = 7; //placeholder
 
   // Limit switches
-  public static final int MIN_LIMIT_SWITCH_ID = 0;  //placeholder
-  public static final int MAX_LIMIT_SWITCH_ID = 1; //placeholder
+  public static final int MIN_LIMIT_SWITCH_ID_DIO = 0;  //placeholder
+  public static final int MAX_LIMIT_SWITCH_ID_DIO = 1; //placeholder
+  
 
   // PID constants
 
@@ -31,26 +32,27 @@ public static final class PivotConstants {
   public static final double PIVOT_F = 0.0;
 
   public static final int ENCODER_ID = 0;
-  public static final double PIVOT_SPEED = 0.3;
+  public static final int CANDLE_ID = 11;
+  public static final double MANUAL_PIVOT_SPEED = 0.15;
   
-  public static final double MAX_ANGLE = 90.0;  
+  public static final double MAX_ANGLE = 45.0;  
   public static final double MIN_ANGLE = 0.0;   
   
-  public static final double GEAR_RATIO = 0.8 ; // update with real value
+  public static final double GEAR_RATIO = 14.0;
 
-  // Pivot Positions (UPDATE PLACEHOLDERS!!)
-  public static final double MAX_POSITION = 0;
-  public static final double INTAKE_POSITION = 0;
-  public static final double MIN_POSITION = 0;
+  // Pivot Positions
+  public static final double MAX_POSITION = 45.0;
+  public static final double INTAKE_POSITION = 15.0;
+  public static final double MIN_POSITION = 0.0;
   public static final double POSITION_TOLERANCE = 1.5;
 }
 public static final class PneumaticsConstants {
   public static final int pneumaticID = 0;
-  public static final int pneumaticCANId = 0;
+  public static final int pneumaticCANId = 10;
 }
 
 public static final class ServoConstants {
-  public static final int SERVO_ID = 0;
+  public static final int SERVO_ID = 7;
 
   // to update opem/closed positions
   public static final double CLOSED_POSITION = 0.0; 

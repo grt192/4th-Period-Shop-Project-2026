@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
@@ -22,9 +24,8 @@ public class PivotSubsystem extends SubsystemBase {
   private final TalonFX leftKraken = new TalonFX(PivotConstants.PIVOT_MOTOR_LEFT_ID, "can");
   private final TalonFX rightKraken = new TalonFX(PivotConstants.PIVOT_MOTOR_RIGHT_ID, "can");
 
-  // Limit Switches
-  private final DigitalInput topLimitSwitch = new DigitalInput(PivotConstants.MAX_LIMIT_SWITCH_ID);
-  private final DigitalInput bottomLimitSwitch = new DigitalInput(PivotConstants.MIN_LIMIT_SWITCH_ID);
+  // Switched to CANdle for limit switches
+  private final CANdle candle = new CANdle(PivotConstants.CANDLE_ID);
 
   // Encoder
   private final CANcoder canCoder = new CANcoder(PivotConstants.ENCODER_ID);
@@ -40,9 +41,14 @@ public class PivotSubsystem extends SubsystemBase {
   private boolean previousTopLimitState = false;
 
   public PivotSubsystem() {
+    configCANdle();
     configMotors();
     configEncoder();
   }
+
+  
+  
+
 
   /**
    * Configures both pivot motors with PID, brake mode, & follower setup.
@@ -79,6 +85,11 @@ public class PivotSubsystem extends SubsystemBase {
     canCoder.getConfigurator().apply(config);
   }
 
+  //  Config CANdle (default settings)
+  private void configCANdle() {
+    CANdleConfiguration config = new CANdleConfiguration();
+    candle.configAllSettings(config);
+  }
    /**
    * Converts encoder rotations to degrees by multiplying by 360
    * @return Current angle in degrees
@@ -96,21 +107,22 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
   public boolean isAtTopLimit() {
-    // Prevent moving up if at top limit
-    return !topLimitSwitch.get();
+    // Prevent moving up if at top limit (switch to read from CANdle)
+    return candle.getDigitalInput(PivotConstants.MAX_LIMIT_SWITCH_ID_DIO);
+
   }
 
   public boolean isAtBottomLimit() {
-    // Prevent moving down if at bottom limit
-    return !bottomLimitSwitch.get(); 
+    // Prevent moving down if at bottom limit (switch to read from CANdle)
+    return candle.getDigitalInput(PivotConstants.MIN_LIMIT_SWITCH_ID_DIO);
+
   }
 
   public void setAngle(double angleDegrees) {
     angleDegrees = Math.max(PivotConstants.MIN_ANGLE,
                            Math.min(PivotConstants.MAX_ANGLE, angleDegrees));
 
-    double motorRotations = (angleDegrees / 360.0) * PivotConstants.GEAR_RATIO;
-    // Get motor rotations 
+    double motorRotations = (angleDegrees / 360.0) / PivotConstants.GEAR_RATIO;
 
     leftKraken.setControl(positionControl.withPosition(motorRotations));
   }
