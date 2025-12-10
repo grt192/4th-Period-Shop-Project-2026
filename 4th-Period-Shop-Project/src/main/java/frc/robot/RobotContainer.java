@@ -31,15 +31,9 @@ public class RobotContainer {
 
   // Controllers
   private final CommandPS5Controller driverController = new CommandPS5Controller(OIConstants.DRIVER_CONTROLLER_PORT);
-  public double joyConLeft;
-  public double joyConRight;
 
 
   public RobotContainer() {
-
-    joyConLeft = 0;
-    joyConRight = 0;
-
     configureBindings();
     configureDefaultCommands();
 
@@ -47,30 +41,30 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // MAX POSITION: Circle
-    driverController.circle().onTrue(
-      new PositionPivot(pivotSubsystem, PivotConstants.MAX_POSITION)
-    );
-
-    // INTAKE POSITION: Cross
-    driverController.cross().onTrue(
-      new PositionPivot(pivotSubsystem, PivotConstants.INTAKE_POSITION)
-    );
-
-    // MIN POSITION: Square
+    // Square: 0° (stowed)
     driverController.square().onTrue(
-      new PositionPivot(pivotSubsystem, PivotConstants.MIN_POSITION)
+      new PositionPivot(pivotSubsystem, PivotConstants.MIN_ANGLE)
+    );
+
+    // Cross: 45° (mid position)
+    driverController.cross().onTrue(
+      new PositionPivot(pivotSubsystem, PivotConstants.MID_POSITION)
+    );
+
+    // Circle: 90° (fully raised)
+    driverController.circle().onTrue(
+      new PositionPivot(pivotSubsystem, PivotConstants.MAX_ANGLE)
     );
     //PNEUMATICS: Triangle
     driverController.triangle().onTrue(
       new InstantCommand(() -> pneumaticSubsystem.togglePneumatic(), pneumaticSubsystem)
     );
 
-    //INTAKE: Create buttton (Ran out of buttons to use .. I know it's small but please change if a better button is available)
+    //SERVO: Create button - move to open position (120 degrees)
     driverController.create().onTrue(
-      new PositionServo(intakeSubsystem, ServoConstants.SERVO_POSITION) );
-    
-    //Intake: R1 close L1 open
+      new PositionServo(intakeSubsystem, ServoConstants.OPEN_POSITION) );
+
+    //SERVO: R1 open (counterclockwise to 120°), L1 close (back to home 0°)
     driverController.R1().whileTrue(
       new ManualServo(intakeSubsystem, ServoConstants.INTAKE_SPEED)
     );
@@ -81,14 +75,12 @@ public class RobotContainer {
 }
   private void configureDefaultCommands() {
     tankDrive.setDefaultCommand(new RunCommand(() -> {
-      this.joyConLeft = driverController.getLeftY();
-      this.joyConRight = driverController.getRightX(); 
-      tankDrive.altDrive(joyConLeft, joyConRight);
+      tankDrive.arcadeDrive(driverController.getLeftY(), driverController.getRightX());
     }, tankDrive));
   
     // Pivot Configs: R2 for pivot up and L2 for pivot down
       pivotSubsystem.setDefaultCommand(
-      new ManualPivot(pivotSubsystem, () -> driverController.getR2Axis() - driverController.getL2Axis()
+      new ManualPivot(pivotSubsystem, () -> driverController.getL2Axis() - driverController.getR2Axis()
       )
     );
 

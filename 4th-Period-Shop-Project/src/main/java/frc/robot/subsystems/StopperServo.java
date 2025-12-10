@@ -8,15 +8,18 @@ import frc.robot.Constants.ServoConstants;
 public class StopperServo extends SubsystemBase{
     private Servo intakeServo = new Servo(ServoConstants.SERVO_ID);
     public StopperServo() {
-        closeIntake();
+        // Boot at home position (0 degrees)
+        goHome();
     }
 
+    // Set servo to home position (0 degrees)
+    public void goHome() {
+        intakeServo.setPosition(ServoConstants.HOME_POSITION);
+    }
+
+    // Set servo to open position (120 degrees counterclockwise)
     public void openIntake() {
         intakeServo.setPosition(ServoConstants.OPEN_POSITION);
-    }
-    // Set servo to the preset closed position
-    public void closeIntake() {
-        intakeServo.setPosition(ServoConstants.CLOSED_POSITION);
     }
     
     public boolean isOpen() {

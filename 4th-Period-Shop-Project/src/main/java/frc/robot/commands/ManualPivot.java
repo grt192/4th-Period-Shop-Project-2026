@@ -27,8 +27,8 @@ public class ManualPivot extends Command {
 
   @Override
   public InterruptionBehavior getInterruptionBehavior() {
-    // This command can interrupt any other command using the pivot subsystem
-    return InterruptionBehavior.kCancelIncoming;
+    // Allow this command to be interrupted by button commands
+    return InterruptionBehavior.kCancelSelf;
   }
 
   @Override

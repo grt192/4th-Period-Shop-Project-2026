@@ -4,67 +4,76 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
 public class TankDriveSubsystem extends SubsystemBase {
 
   // motors
-  private final WPI_TalonSRX leftFront  = new WPI_TalonSRX(DriveConstants.left_front_motor_id);
-  private final WPI_TalonSRX leftBack   = new WPI_TalonSRX(DriveConstants.left_back_motor_id);
-  private final WPI_TalonSRX rightFront = new WPI_TalonSRX(DriveConstants.right_front_motor_id);
-  private final WPI_TalonSRX rightBack  = new WPI_TalonSRX(DriveConstants.right_back_motor_id);
+  private final SparkMax leftFront  = new SparkMax(DriveConstants.left_front_motor_id, MotorType.kBrushless);
+  private final SparkMax leftBack   = new SparkMax(DriveConstants.left_back_motor_id, MotorType.kBrushless);
+  private final SparkMax rightFront = new SparkMax(DriveConstants.right_front_motor_id, MotorType.kBrushless);
+  private final SparkMax rightBack  = new SparkMax(DriveConstants.right_back_motor_id, MotorType.kBrushless);
+
+  // WPILib DifferentialDrive for tank/arcade drive
+  private final DifferentialDrive drive;
 
   public TankDriveSubsystem() {
     // config left
-    leftBack.follow(leftFront);
-    setNeutralMode(leftFront, leftBack, NeutralMode.Coast);
+    SparkMaxConfig leftConfig = new SparkMaxConfig();
+    leftConfig.idleMode(IdleMode.kCoast);
+    leftConfig.inverted(true);  // Invert left side
+    leftFront.configure(leftConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
+    leftBack.configure(leftConfig.follow(leftFront), SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
 
     // config right
-    rightBack.follow(rightFront);
-    setNeutralMode(rightFront, rightBack, NeutralMode.Coast);
+    SparkMaxConfig rightConfig = new SparkMaxConfig();
+    rightConfig.idleMode(IdleMode.kCoast);
+    rightConfig.inverted(false);  // Right side not inverted
+    rightFront.configure(rightConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
+    rightBack.configure(rightConfig.follow(rightFront), SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
+
+    // Initialize DifferentialDrive with leader motors
+    drive = new DifferentialDrive(leftFront, rightFront);
+    drive.setDeadband(DriveConstants.DEADBAND);
   }
 
   /**
-   * Set motor speeds for left and right sides.
-   *
-   * @param leftSpeed  Motor speed (-1.0 to 1.0).
-   * @param rightSpeed Motor speed (-1.0 to 1.0).
+   * Arcade drive using WPILib's DifferentialDrive
+   * @param forward Forward/backward speed (typically left stick Y)
+   * @param rotation Rotation speed (typically right stick X)
    */
-  public void setMotors(double leftSpeed, double rightSpeed) {
-    leftFront.set(-leftSpeed); // invert left side
-    rightFront.set(rightSpeed);
+  public void arcadeDrive(double forward, double rotation) {
+    drive.arcadeDrive(forward, rotation);
   }
 
   /**
-   * Alternate drive mode using two joystick axes
+   * Tank drive using WPILib's DifferentialDrive
+   * @param leftSpeed Left side speed
+   * @param rightSpeed Right side speed
    */
-  public void altDrive(double leftAxis, double rightAxis) {
-    if (leftAxis == 0 && rightAxis != 0) {
-      // Spin in place
-      setMotors(rightAxis, -rightAxis);
-    } else if (leftAxis != 0 && rightAxis == 0) {
-      // Move straight
-      setMotors(leftAxis, leftAxis);
-    } else {
-      // mix
-      setMotors((leftAxis - rightAxis) / 2.0, (leftAxis + rightAxis) / 2.0);
-    }
+  public void tankDrive(double leftSpeed, double rightSpeed) {
+    drive.tankDrive(leftSpeed, rightSpeed);
   }
 
   //Set all motors to Brake / Coast mode
 
   public void setBrakeMode(boolean brake) {
-    NeutralMode mode = brake ? NeutralMode.Brake : NeutralMode.Coast;
-    setNeutralMode(leftFront, leftBack, mode);
-    setNeutralMode(rightFront, rightBack, mode);
+    IdleMode mode = brake ? IdleMode.kBrake : IdleMode.kCoast;
+    setIdleMode(leftFront, leftBack, mode);
+    setIdleMode(rightFront, rightBack, mode);
   }
 
   // helper (reduces repitition)
-  private void setNeutralMode(WPI_TalonSRX m1, WPI_TalonSRX m2, NeutralMode mode) {
-    m1.setNeutralMode(mode);
-    m2.setNeutralMode(mode);
+  private void setIdleMode(SparkMax m1, SparkMax m2, IdleMode mode) {
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.idleMode(mode);
+    m1.configure(config, SparkMax.ResetMode.kNoResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters);
+    m2.configure(config, SparkMax.ResetMode.kNoResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters);
   }
 }
