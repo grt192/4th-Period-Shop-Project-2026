@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -27,8 +27,8 @@ public class PivotSubsystem extends SubsystemBase {
   // Duty cycle (percent output) control
   private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
 
-  //Position based voltage control with PID
-  private final PositionVoltage positionControl = new PositionVoltage(0);
+  //Position based torque current FOC control with PID
+  private final PositionTorqueCurrentFOC positionControl = new PositionTorqueCurrentFOC(0);
 
   public PivotSubsystem() {
     configMotors();
@@ -43,15 +43,14 @@ public class PivotSubsystem extends SubsystemBase {
   private void configMotors() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // PID Config for position control
+    // PID Config for TorqueCurrentFOC position control
     config.Slot0.kP = PivotConstants.PIVOT_P;
     config.Slot0.kI = PivotConstants.PIVOT_I;
     config.Slot0.kD = PivotConstants.PIVOT_D;
-    config.Slot0.kV = PivotConstants.PIVOT_F; // Feedforward gain (accounts for forces)
 
-    // Voltage and current limits
-    config.Voltage.PeakForwardVoltage = PivotConstants.PIVOT_MAX_VOLTAGE;
-    config.Voltage.PeakReverseVoltage = -PivotConstants.PIVOT_MAX_VOLTAGE;
+    // Torque current limits
+    config.TorqueCurrent.PeakForwardTorqueCurrent = PivotConstants.PIVOT_MAX_CURRENT;
+    config.TorqueCurrent.PeakReverseTorqueCurrent = -PivotConstants.PIVOT_MAX_CURRENT;
     config.CurrentLimits.StatorCurrentLimit = PivotConstants.PIVOT_CURRENT_LIMIT;
     config.CurrentLimits.SupplyCurrentLimit = PivotConstants.PIVOT_SUPPLY_CURRENT_LIMIT;
     config.CurrentLimits.StatorCurrentLimitEnable = true;

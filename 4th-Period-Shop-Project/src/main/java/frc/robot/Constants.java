@@ -7,11 +7,11 @@ package frc.robot;
 public final class Constants {
   public static final class DriveConstants {
     //MOTOR CAN IDs
-    public static final int left_front_motor_id = 2;
+    public static final int left_front_motor_id = 2; //UPDATE
     public static final int left_back_motor_id = 1;
 
     public static final int right_front_motor_id = 18;
-    public static final int right_back_motor_id = 4;
+    public static final int right_back_motor_id = 4; //UPDATE
 
     // Joystick deadband to prevent stick drift
     public static final double DEADBAND = 0.02;
@@ -19,20 +19,19 @@ public final class Constants {
 public static final class PivotConstants {
 
   // Motors
-  public static final int PIVOT_MOTOR_LEFT_ID = 5;
-  public static final int PIVOT_MOTOR_RIGHT_ID = 6;
+  public static final int PIVOT_MOTOR_LEFT_ID = 4;
+  public static final int PIVOT_MOTOR_RIGHT_ID = 2;
 
-  // PID constants for 15lb seesaw with 14:1 gear ratio
-  public static final double PIVOT_P = 0.5;    // Proportional gain - increase if response is too slow
-  public static final double PIVOT_I = 0.0;    // Integral - keep at 0 initially
-  public static final double PIVOT_D = 0.05;   // Derivative - helps reduce oscillation
-  public static final double PIVOT_F = 0.05;   // Feedforward/gravity compensation - tune this for holding position
+  // PID constants for TorqueCurrentFOC with 14:1 gear ratio
+  public static final double PIVOT_P = 0.1;  // Proportional gain (torque in amps per rotation error)
+  public static final double PIVOT_I = 0.0;  // Integral
+  public static final double PIVOT_D = 0.0;  // Derivative
 
   public static final int ENCODER_ID = 0;
 
   // Speed and current limits
   public static final double PIVOT_MANUAL_SPEED = 0.1;  // Manual control speed (0.0 to 1.0)
-  public static final double PIVOT_MAX_VOLTAGE = 12.0;   // Maximum voltage output
+  public static final double PIVOT_MAX_CURRENT = 80.0;   // Maximum torque current (amps)
   public static final double PIVOT_CURRENT_LIMIT = 80.0; // Stator current limit (amps)
   public static final double PIVOT_SUPPLY_CURRENT_LIMIT = 40.0; // Supply current limit (amps)
 
