@@ -16,8 +16,8 @@ public final class Constants {
 public static final class PivotConstants {
 
   // Motors
-  public static final int PIVOT_MOTOR_LEFT_ID = 6;  //placeholder
-  public static final int PIVOT_MOTOR_RIGHT_ID = 7; //placeholder
+  public static final int PIVOT_MOTOR_LEFT_ID = 4; 
+  public static final int PIVOT_MOTOR_RIGHT_ID = 2;
 
   // Limit switches
   public static final int MIN_LIMIT_SWITCH_ID_DIO = 0;  //placeholder
@@ -52,7 +52,7 @@ public static final class PneumaticsConstants {
 }
 
 public static final class ServoConstants {
-  public static final int SERVO_ID = 7;
+  public static final int SERVO_ID = 9;
 
   // to update opem/closed positions
   public static final double CLOSED_POSITION = 0.0; 
