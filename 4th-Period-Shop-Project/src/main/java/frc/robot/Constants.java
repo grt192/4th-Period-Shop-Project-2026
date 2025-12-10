@@ -16,8 +16,8 @@ public final class Constants {
 public static final class PivotConstants {
 
   // Motors
-  public static final int PIVOT_MOTOR_LEFT_ID = 5;  // Changed from 1 to avoid conflict with left_back drive motor
-  public static final int PIVOT_MOTOR_RIGHT_ID = 6; // Changed from 2 to avoid conflict with left_front drive motor
+  public static final int PIVOT_MOTOR_LEFT_ID = 4;  // Changed from 1 to avoid conflict with left_back drive motor
+  public static final int PIVOT_MOTOR_RIGHT_ID = 2; // Changed from 2 to avoid conflict with left_front drive motor
 
   // PID constants
 
