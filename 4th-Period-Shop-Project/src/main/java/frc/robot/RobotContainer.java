@@ -30,7 +30,7 @@ public class RobotContainer {
 
 
   // Controllers
-  private final CommandPS5Controller driverController = new CommandPS5Controller(OIConstants.DRIVER_CONTROLLER_PORT);
+  private final CommandPS5Controller driverController = new CommandPS5Controller(0);
 
 
   public RobotContainer() {
