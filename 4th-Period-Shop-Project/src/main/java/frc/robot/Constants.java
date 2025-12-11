@@ -26,6 +26,8 @@ public static final class PivotConstants {
   public static final double PIVOT_P = 0.1;  // Proportional gain (torque in amps per rotation error)
   public static final double PIVOT_I = 0.0;  // Integral
   public static final double PIVOT_D = 0.0;  // Derivative
+  public static final double PIVOT_KG = 0.0;  // Gravity feedforward (torque in amps to counteract gravity)
+  public static final double PIVOT_KS = 0.0;  // Static friction feedforward (torque in amps to overcome static friction)
 
   public static final int ENCODER_ID = 0;
 

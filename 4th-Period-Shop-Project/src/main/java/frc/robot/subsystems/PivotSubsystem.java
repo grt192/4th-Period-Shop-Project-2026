@@ -13,6 +13,9 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PivotConstants;
 
@@ -37,16 +40,27 @@ public class PivotSubsystem extends SubsystemBase {
 
   /**
    * Configures both pivot motors with PID, brake mode, & follower setup.
-   * The left motor is the leader, and the right motor follows AFTER being inversed because they are 
+   * The left motor is the leader, and the right motor follows AFTER being inversed because they are
    * directly positioned opposite to each other.
+   * Uses CANcoder as feedback source for improved accuracy.
    */
   private void configMotors() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // PID Config for TorqueCurrentFOC position control
+    // PID Config for TorqueCurrentFOC position control with gravity compensation
     config.Slot0.kP = PivotConstants.PIVOT_P;
     config.Slot0.kI = PivotConstants.PIVOT_I;
     config.Slot0.kD = PivotConstants.PIVOT_D;
+    config.Slot0.kG = PivotConstants.PIVOT_KG;
+    config.Slot0.kS = PivotConstants.PIVOT_KS;
+    config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+
+    // Use CANcoder as feedback source
+    config.Feedback.FeedbackRemoteSensorID = PivotConstants.ENCODER_ID;
+    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    config.Feedback.RotorToSensorRatio = PivotConstants.GEAR_RATIO;
+    config.Feedback.SensorToMechanismRatio = 1.0;
 
     // Torque current limits
     config.TorqueCurrent.PeakForwardTorqueCurrent = PivotConstants.PIVOT_MAX_CURRENT;
@@ -55,6 +69,12 @@ public class PivotSubsystem extends SubsystemBase {
     config.CurrentLimits.SupplyCurrentLimit = PivotConstants.PIVOT_SUPPLY_CURRENT_LIMIT;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    // Software soft limits
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = PivotConstants.MAX_ANGLE / 360.0;
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = PivotConstants.MIN_ANGLE / 360.0;
 
     // Break mode holds position when stopped
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -71,12 +91,16 @@ public class PivotSubsystem extends SubsystemBase {
     rightKraken.setControl(new Follower(PivotConstants.PIVOT_MOTOR_LEFT_ID, true));
   }
 
-  //  Config encoder - boots at 0 degrees
+  //  Config encoder with discontinuity point for proper wrapping
   private void configEncoder() {
     CANcoderConfiguration config = new CANcoderConfiguration();
+
+    // Calculate discontinuity point: mean of limits + 0.5 rotations
+    // For 0° to 90° range: (0 + 90)/2 / 360 + 0.5 = 0.625 rotations
+    double discontinuityPoint = ((PivotConstants.MIN_ANGLE + PivotConstants.MAX_ANGLE) / 2.0 / 360.0) + 0.5;
+    config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = discontinuityPoint;
+
     canCoder.getConfigurator().apply(config);
-    // Initialize encoder to 0 on boot
-    canCoder.setPosition(0.0);
   }
 
    /**
