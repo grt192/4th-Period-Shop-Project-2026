@@ -7,11 +7,14 @@ package frc.robot;
 public final class Constants {
   public static final class DriveConstants {
     //MOTOR CAN IDs
-    public static final int left_front_motor_id =3;
+    public static final int left_front_motor_id = 3; //UPDATE
     public static final int left_back_motor_id = 10;
 
     public static final int right_front_motor_id = 7;
-    public static final int right_back_motor_id = 9;
+    public static final int right_back_motor_id = 9; //UPDATE
+
+    // Joystick deadband to prevent stick drift
+    public static final double DEADBAND = 0.02;
   }
 public static final class PivotConstants {
 
