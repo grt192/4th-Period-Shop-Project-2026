@@ -16,14 +16,14 @@ import frc.robot.commands.ManualServo;
 import frc.robot.commands.ManualPivot;
 import frc.robot.commands.PositionServo;
 import frc.robot.commands.PositionPivot;
-import frc.robot.subsystems.TankDriveSubsystem;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.StopperServo;
 import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.PneumaticsSubsystem;
 
 public class RobotContainer {
   // Subsystems
-  private final TankDriveSubsystem tankDrive= new TankDriveSubsystem();
+  private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
   private final PneumaticsSubsystem pneumaticSubsystem = new PneumaticsSubsystem();
   private final StopperServo intakeSubsystem = new StopperServo();
@@ -74,9 +74,9 @@ public class RobotContainer {
     );
 }
   private void configureDefaultCommands() {
-    tankDrive.setDefaultCommand(new RunCommand(() -> {
-      tankDrive.arcadeDrive(driverController.getLeftY(), driverController.getRightX());
-    }, tankDrive));
+    driveSubsystem.setDefaultCommand(new RunCommand(() -> {
+      driveSubsystem.arcadeDrive(driverController.getLeftY(), driverController.getRightX());
+    }, driveSubsystem));
   
     // Pivot Configs: R2 spins positive and L2 spins negative
       pivotSubsystem.setDefaultCommand(
