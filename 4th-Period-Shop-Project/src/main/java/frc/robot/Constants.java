@@ -7,6 +7,7 @@ package frc.robot;
 public final class Constants {
   public static final class DriveConstants {
     //MOTOR CAN IDs
+<<<<<<< Updated upstream
     public static final int left_front_motor_id = 2; //UPDATE
     public static final int left_back_motor_id = 1;
 
@@ -15,12 +16,24 @@ public final class Constants {
 
     // Joystick deadband to prevent stick drift
     public static final double DEADBAND = 0.02;
+=======
+    public static final int left_front_motor_id =3;
+    public static final int left_back_motor_id = 10;
+
+    public static final int right_front_motor_id = 7;
+    public static final int right_back_motor_id = 9;
+>>>>>>> Stashed changes
   }
 public static final class PivotConstants {
 
   // Motors
+<<<<<<< Updated upstream
   public static final int PIVOT_MOTOR_LEFT_ID = 4;
   public static final int PIVOT_MOTOR_RIGHT_ID = 2;
+=======
+  public static final int PIVOT_MOTOR_LEFT_ID = 4;  // Changed from 1 to avoid conflict with left_back drive motor
+  public static final int PIVOT_MOTOR_RIGHT_ID = 2; // Changed from 2 to avoid conflict with left_front drive motor
+>>>>>>> Stashed changes
 
   // PID constants for TorqueCurrentFOC with 14:1 gear ratio
   public static final double PIVOT_P = 0.1;  // Proportional gain (torque in amps per rotation error)
