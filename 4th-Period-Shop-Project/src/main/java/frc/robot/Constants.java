@@ -33,20 +33,20 @@ public static final class PivotConstants {
   public static final int ENCODER_ID = 0;
 
   // Speed and current limits
-  public static final double PIVOT_MANUAL_SPEED = 0.1;  // Manual control speed (0.0 to 1.0)
+  public static final double PIVOT_MANUAL_SPEED = 0.06;  // Manual control speed (0.0 to 1.0)
   public static final double PIVOT_MAX_CURRENT = 80.0;   // Maximum torque current (amps)
   public static final double PIVOT_CURRENT_LIMIT = 80.0; // Stator current limit (amps)
   public static final double PIVOT_SUPPLY_CURRENT_LIMIT = 40.0; // Supply current limit (amps)
 
-  // Angle limits (in degrees)
-  public static final double MIN_ANGLE = 0.0;   // Minimum angle / stowed position
-  public static final double MAX_ANGLE = 90.0;  // Maximum angle / fully raised position
+  // Angle limits (in rotations - relative encoder range)
+  public static final double MIN_ANGLE = 0.0;   // Minimum position / stowed
+  public static final double MAX_ANGLE = 0.14;  // Maximum position / fully raised
 
   public static final double GEAR_RATIO = 14; // 14 motor rotations = 1 output rotation
 
-  // Preset positions (in degrees)
-  public static final double MID_POSITION = 45.0;  // Mid position
-  public static final double POSITION_TOLERANCE = 1.5;
+  // Preset positions (in rotations)
+  public static final double MID_POSITION = 0.07;  // Mid position (halfway between 0 and 0.14)
+  public static final double POSITION_TOLERANCE = 0.01;  // Tolerance in rotations
 }
 public static final class PneumaticsConstants {
   public static final int pneumaticID = 1;        // Solenoid channel on PCM (0-7)

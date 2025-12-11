@@ -80,7 +80,7 @@ public class RobotContainer {
   
     // Pivot Configs: R2 spins positive and L2 spins negative
       pivotSubsystem.setDefaultCommand(
-      new ManualPivot(pivotSubsystem, () -> driverController.getR2Axis() - driverController.getL2Axis()
+      new ManualPivot(pivotSubsystem, () -> -driverController.getL2Axis() + driverController.getR2Axis()
       )
     );
 

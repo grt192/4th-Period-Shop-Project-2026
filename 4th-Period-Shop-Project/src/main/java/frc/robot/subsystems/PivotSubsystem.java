@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PivotConstants;
 
@@ -70,11 +71,9 @@ public class PivotSubsystem extends SubsystemBase {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    // Software soft limits
-    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = PivotConstants.MAX_ANGLE / 360.0;
-    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = PivotConstants.MIN_ANGLE / 360.0;
+    // Software soft limits DISABLED
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
 
     // Break mode holds position when stopped
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -96,19 +95,18 @@ public class PivotSubsystem extends SubsystemBase {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
     // Calculate discontinuity point: mean of limits + 0.5 rotations
-    // For 0° to 90° range: (0 + 90)/2 / 360 + 0.5 = 0.625 rotations
-    double discontinuityPoint = ((PivotConstants.MIN_ANGLE + PivotConstants.MAX_ANGLE) / 2.0 / 360.0) + 0.5;
+    double discontinuityPoint = ((PivotConstants.MIN_ANGLE + PivotConstants.MAX_ANGLE) / 2.0) + 0.5;
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = discontinuityPoint;
 
     canCoder.getConfigurator().apply(config);
   }
 
    /**
-   * Converts encoder rotations to degrees by multiplying by 360
-   * @return Current angle in degrees
+   * Gets current encoder position in rotations
+   * @return Current position in rotations
    */
-  public double getAngleDegrees() {
-    return canCoder.getPosition().getValueAsDouble() * 360.0;
+  public double getPosition() {
+    return canCoder.getPosition().getValueAsDouble();
   }
 
 
@@ -120,35 +118,29 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
 
-  public void setAngle(double angleDegrees) {
-    angleDegrees = Math.max(PivotConstants.MIN_ANGLE,
-                           Math.min(PivotConstants.MAX_ANGLE, angleDegrees));
+  public void setPosition(double rotations) {
+    // No position clamping - full range of motion
 
     // Encoder is on the pivot point (not affected by gear ratio)
     // Motor must rotate more due to gear ratio (motor_rotations = encoder_rotations * gear_ratio)
-    double encoderRotations = angleDegrees / 360.0;
-    double motorRotations = encoderRotations * PivotConstants.GEAR_RATIO;
+    double motorRotations = rotations * PivotConstants.GEAR_RATIO;
 
     leftKraken.setControl(positionControl.withPosition(motorRotations));
   }
 
  /**
    * Manually controls the pivot at a specific speed
-   * Implements soft limits based on encoder: prevents movement beyond 0° to 90° range
+   * No soft limits - full manual control
    *
    * @param speed Desired speed from -1.0 to 1.0
    */
   public void setManualSpeed(double speed) {
-    double currentAngle = getAngleDegrees();
+    // Debug logging
+    SmartDashboard.putNumber("Pivot/Manual Speed Input", speed);
+    SmartDashboard.putNumber("Pivot/Current Position", getPosition());
+    SmartDashboard.putNumber("Pivot/Motor Voltage", leftKraken.getMotorVoltage().getValueAsDouble());
 
-    // Soft limits: stop if encoder exceeds angle range (0° to 90°)
-    if (currentAngle >= PivotConstants.MAX_ANGLE && speed > 0) {
-      speed = 0;
-    }
-    if (currentAngle <= PivotConstants.MIN_ANGLE && speed < 0) {
-      speed = 0;
-    }
-    // Command duty cycle to leader motor (leftKraken)
+    // Command duty cycle to leader motor (leftKraken) - no limits
     leftKraken.setControl(dutyCycleControl.withOutput(speed));
   }
 

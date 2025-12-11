@@ -10,36 +10,36 @@ import frc.robot.subsystems.PivotSubsystem;
 
 public class PositionPivot extends Command {
   private final PivotSubsystem pivotSubsystem;
-  private final double targetAngle;
+  private final double targetPosition;
 
   /**
    * Creates a new PositionPivot command.
-   * 
+   *
    * @param pivotSubsystem The pivot subsystem to control
-   * @param targetAngle The desired angle in degrees for the pivot to move to
+   * @param targetPosition The desired position in rotations for the pivot to move to
    */
-  public PositionPivot(PivotSubsystem pivotSubsystem, double targetAngle) {
+  public PositionPivot(PivotSubsystem pivotSubsystem, double targetPosition) {
     this.pivotSubsystem = pivotSubsystem;
-    this.targetAngle = targetAngle;
+    this.targetPosition = targetPosition;
     addRequirements(pivotSubsystem);
   }
 
 
-   // Commands the pivot to move to the target angle with PID control
+   // Commands the pivot to move to the target position with PID control
   public void initialize() {
   }
 
   @Override
   public void execute() {
-    // Continuously command the target angle to maintain PID control until finished
-    pivotSubsystem.setAngle(targetAngle);
+    // Continuously command the target position to maintain PID control until finished
+    pivotSubsystem.setPosition(targetPosition);
   }
 
   @Override
   public void end(boolean interrupted) {
   }
   /**
-   * Finishes when the pivot is within set tolerance of the target angle
+   * Finishes when the pivot is within set tolerance of the target position
    * @return True if pivot reaches target position within the configured tolerance
    */
   @Override
@@ -48,11 +48,11 @@ public class PositionPivot extends Command {
   }
 
   /**
-   * Checks if the current pivot angle is within acceptable tolerance of target
+   * Checks if the current pivot position is within acceptable tolerance of target
    * @return True if position error < configured tolerance
    */
   public boolean isWithinTolerance() {
-    double positionError = Math.abs(pivotSubsystem.getAngleDegrees() - targetAngle);
+    double positionError = Math.abs(pivotSubsystem.getPosition() - targetPosition);
     return positionError < PivotConstants.POSITION_TOLERANCE;
   }
 }
