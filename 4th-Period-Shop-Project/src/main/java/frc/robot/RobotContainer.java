@@ -78,9 +78,9 @@ public class RobotContainer {
       tankDrive.arcadeDrive(driverController.getLeftY(), driverController.getRightX());
     }, tankDrive));
   
-    // Pivot Configs: R2 for pivot up and L2 for pivot down
+    // Pivot Configs: R2 spins positive and L2 spins negative
       pivotSubsystem.setDefaultCommand(
-      new ManualPivot(pivotSubsystem, () -> driverController.getL2Axis() - driverController.getR2Axis()
+      new ManualPivot(pivotSubsystem, () -> driverController.getR2Axis() - driverController.getL2Axis()
       )
     );
 
