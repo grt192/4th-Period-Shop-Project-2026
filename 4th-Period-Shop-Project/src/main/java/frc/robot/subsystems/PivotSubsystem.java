@@ -134,11 +134,20 @@ public class PivotSubsystem extends SubsystemBase {
 
  /**
    * Manually controls the pivot at a specific speed
-   * No soft limits - full manual control
+   * Implements soft limits based on encoder: prevents movement beyond 0° to 90° range
    *
    * @param speed Desired speed from -1.0 to 1.0
    */
   public void setManualSpeed(double speed) {
+    double currentAngle = getAngleDegrees();
+
+    // Soft limits: stop if encoder exceeds angle range (0° to 90°)
+    if (currentAngle >= PivotConstants.MAX_ANGLE && speed > 0) {
+      speed = 0;
+    }
+    if (currentAngle <= PivotConstants.MIN_ANGLE && speed < 0) {
+      speed = 0;
+    }
     // Command duty cycle to leader motor (leftKraken)
     leftKraken.setControl(dutyCycleControl.withOutput(speed));
   }
