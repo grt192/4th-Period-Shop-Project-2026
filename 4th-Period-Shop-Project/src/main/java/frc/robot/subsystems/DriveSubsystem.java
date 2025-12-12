@@ -63,12 +63,7 @@ public class DriveSubsystem extends SubsystemBase {
                 // Brake when 0 velocity is set
                 .idleMode(IdleMode.kBrake)
                 // Set PID and Max Motion constants
-                .closedLoopRampRate(DriveConstants.closedLoopRampRate.in(Seconds))
-                .openLoopRampRate(DriveConstants.openLoopRampRate.in(Seconds)).closedLoop
-                .pid(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD).maxMotion
-                .maxAcceleration(DriveConstants.maxAcceleration.in(RPMPerSecond))
-                .maxVelocity(DriveConstants.maxVelocity.in(RPM))
-                .allowedClosedLoopError(DriveConstants.allowedError);
+                .openLoopRampRate(DriveConstants.openLoopRampRate.in(Seconds));
 
         // Create configs that invert and setup followers as appropriate
         rightLeaderConfig
@@ -97,8 +92,8 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Init the differential drive object that drive motor with the lambda functions
         robotDriveController = new DifferentialDrive(
-                (leftOutput) -> setLeftVelocity(DriveConstants.maxMotorVelocity.times(leftOutput)),
-                (rightOutput) -> setRightVelocity(DriveConstants.maxMotorVelocity.times(rightOutput)));
+                (leftOutput) -> setLeftDutyCycle(leftOutput),
+                (rightOutput) -> setRightDutyCycle(rightOutput));
     }
 
     // Sets the left motor velocity with PID control
@@ -129,6 +124,14 @@ public class DriveSubsystem extends SubsystemBase {
     // Gets the right velocity with left leader encoders
     public double getRightVelocityRPM() {
         return rightLeaderEncoder.getVelocity();
+    }
+
+    public void setLeftDutyCycle(double percent) {
+        leftLeader.set(percent);
+    }
+
+    public void setRightDutyCycle(double percent) {
+        rightLeader.set(percent);
     }
 
     // Return a tank drive command mode where each stick controls either side of the

@@ -18,6 +18,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.PivotConstants;
 
 public class PivotSubsystem extends SubsystemBase {
@@ -31,17 +32,24 @@ public class PivotSubsystem extends SubsystemBase {
   // Duty cycle (percent output) control
   private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
 
-  //Position based torque current FOC control with PID
+  // Position based torque current FOC control with PID
   private final PositionTorqueCurrentFOC positionControl = new PositionTorqueCurrentFOC(0);
 
   public PivotSubsystem() {
     configMotors();
     configEncoder();
+
+    Trigger forwardSoftStopTrigger = new Trigger(this::atForwardSoftLimit);
+    Trigger reverseSoftStopTrigger = new Trigger(this::atReverseSoftLimit);
+
+    forwardSoftStopTrigger.onTrue(this.runOnce(this::stop));
+    reverseSoftStopTrigger.onTrue(this.runOnce(this::stop));
   }
 
   /**
    * Configures both pivot motors with PID, brake mode, & follower setup.
-   * The left motor is the leader, and the right motor follows AFTER being inversed because they are
+   * The left motor is the leader, and the right motor follows AFTER being
+   * inversed because they are
    * directly positioned opposite to each other.
    * Uses CANcoder as feedback source for improved accuracy.
    */
@@ -90,7 +98,7 @@ public class PivotSubsystem extends SubsystemBase {
     rightKraken.setControl(new Follower(PivotConstants.PIVOT_MOTOR_LEFT_ID, true));
   }
 
-  //  Config encoder with discontinuity point for proper wrapping
+  // Config encoder with discontinuity point for proper wrapping
   private void configEncoder() {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
@@ -101,14 +109,14 @@ public class PivotSubsystem extends SubsystemBase {
     canCoder.getConfigurator().apply(config);
   }
 
-   /**
+  /**
    * Gets current encoder position in rotations
+   * 
    * @return Current position in rotations
    */
   public double getPosition() {
     return canCoder.getPosition().getValueAsDouble();
   }
-
 
   /**
    * @return Absolute encoder position in rotations (0.0 to 1.0)
@@ -121,6 +129,11 @@ public class PivotSubsystem extends SubsystemBase {
   boolean flipFlop = false;
   public void intakePos() {
     // No position clamping - full range of motion
+    if (rotations > PivotConstants.MAX_ANGLE) {
+      rotations = PivotConstants.MAX_ANGLE;
+    } else if (rotations < PivotConstants.MIN_ANGLE) {
+      rotations = PivotConstants.MIN_ANGLE;
+    }
 
     // Encoder is on the pivot point (not affected by gear ratio)
     // Motor must rotate more due to gear ratio (motor_rotations = encoder_rotations * gear_ratio)
@@ -138,7 +151,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
   }
 
- /**
+  /**
    * Manually controls the pivot at a specific speed
    * No soft limits - full manual control
    *
@@ -150,16 +163,22 @@ public class PivotSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Pivot/Current Position", getPosition());
     SmartDashboard.putNumber("Pivot/Motor Voltage", leftKraken.getMotorVoltage().getValueAsDouble());
 
+    if (atForwardSoftLimit() && speed > 0) {
+      speed = 0;
+    } else if (atReverseSoftLimit() && speed < 0) {
+      speed = 0;
+    }
+
     // Command duty cycle to leader motor (leftKraken) - no limits
     leftKraken.setControl(dutyCycleControl.withOutput(speed));
   }
 
-   // Set motor output to zero & stop all movement
+  // Set motor output to zero & stop all movement
   public void stop() {
     leftKraken.setControl(dutyCycleControl.withOutput(0));
   }
 
-  //  Resets the encoder position to zero.
+  // Resets the encoder position to zero.
   public void zeroEncoder() {
     canCoder.setPosition(0.0);
   }
