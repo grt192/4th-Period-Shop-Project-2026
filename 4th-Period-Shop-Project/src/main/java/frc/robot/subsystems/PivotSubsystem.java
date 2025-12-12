@@ -125,6 +125,13 @@ public class PivotSubsystem extends SubsystemBase {
     return canCoder.getAbsolutePosition().getValueAsDouble();
   }
 
+  public boolean atForwardSoftLimit() {
+    return getPosition() >= PivotConstants.MAX_ANGLE;
+  }
+
+  public boolean atReverseSoftLimit() {
+    return getPosition() <= PivotConstants.MIN_ANGLE;
+  }
 
   boolean flipFlop = false;
   public void intakePos() {
