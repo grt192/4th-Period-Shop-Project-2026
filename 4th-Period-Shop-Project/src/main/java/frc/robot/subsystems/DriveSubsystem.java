@@ -1,79 +1,150 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
+
+import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
+
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
 public class DriveSubsystem extends SubsystemBase {
+    // Spark Max Motor Objects (Rev NEOs)
+    private final SparkMax leftLeader = new SparkMax(DriveConstants.leftLeaderID, MotorType.kBrushless);
+    private final SparkMax leftFollower = new SparkMax(DriveConstants.leftFollowerID, MotorType.kBrushless);
+    private final SparkMax rightLeader = new SparkMax(DriveConstants.rightLeaderID, MotorType.kBrushless);
+    private final SparkMax rightFollower = new SparkMax(DriveConstants.rightFollowerID, MotorType.kBrushless);
 
-  // motors
-  private final SparkMax leftFront  = new SparkMax(DriveConstants.left_front_motor_id, MotorType.kBrushless);
-  private final SparkMax leftBack   = new SparkMax(DriveConstants.left_back_motor_id, MotorType.kBrushless);
-  private final SparkMax rightFront = new SparkMax(DriveConstants.right_front_motor_id, MotorType.kBrushless);
-  private final SparkMax rightBack  = new SparkMax(DriveConstants.right_back_motor_id, MotorType.kBrushless);
+    // Relative encoders from leader motors
+    private final RelativeEncoder leftLeaderEncoder;
+    private final RelativeEncoder rightLeaderEncoder;
 
-  // WPILib DifferentialDrive for tank/arcade drive
-  private final DifferentialDrive drive;
+    // PID controllers for leader motors
+    private SparkClosedLoopController leftLeaderController;
+    private SparkClosedLoopController rightLeaderController;
 
-  public DriveSubsystem() {
-    // config left
-    SparkMaxConfig leftConfig = new SparkMaxConfig();
-    leftConfig.idleMode(IdleMode.kCoast);
-    leftConfig.inverted(true);  // Invert left side
-    leftFront.configure(leftConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
-    leftBack.configure(leftConfig.follow(leftFront), SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
+    // WPILib method to control a diff drive
+    private DifferentialDrive robotDriveController;
 
-    // config right
-    SparkMaxConfig rightConfig = new SparkMaxConfig();
-    rightConfig.idleMode(IdleMode.kCoast);
-    rightConfig.inverted(false);  // Right side not inverted
-    rightFront.configure(rightConfig, SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
-    rightBack.configure(rightConfig.follow(rightFront), SparkMax.ResetMode.kResetSafeParameters, SparkMax.PersistMode.kPersistParameters);
+    // Calculates arbitrary feedforward for PID controls
+    private SimpleMotorFeedforward velocityFeedforward = new SimpleMotorFeedforward(DriveConstants.kS,
+            1 / DriveConstants.kV);
 
-    // Initialize DifferentialDrive with leader motors
-    drive = new DifferentialDrive(leftFront, rightFront);
-    drive.setDeadband(DriveConstants.DEADBAND);
-  }
+    // Custom unit used by SparkMax Library for angular acceleration
+    private final AngularAccelerationUnit RPMPerSecond = RPM.per(Second);
 
-  /**
-   * Arcade drive using WPILib's DifferentialDrive
-   * @param forward Forward/backward speed (typically left stick Y)
-   * @param rotation Rotation speed (typically right stick X)
-   */
-  public void arcadeDrive(double forward, double rotation) {
-    drive.arcadeDrive(forward, rotation);
-  }
+    public DriveSubsystem() {
+        SparkMaxConfig globalConfig = new SparkMaxConfig();
+        SparkMaxConfig rightLeaderConfig = new SparkMaxConfig();
+        SparkMaxConfig leftFollowerConfig = new SparkMaxConfig();
+        SparkMaxConfig rightFollowerConfig = new SparkMaxConfig();
 
-  /**
-   * Tank drive using WPILib's DifferentialDrive
-   * @param leftSpeed Left side speed
-   * @param rightSpeed Right side speed
-   */
-  public void tankDrive(double leftSpeed, double rightSpeed) {
-    drive.tankDrive(leftSpeed, rightSpeed);
-  }
+        globalConfig
+                // Limit current going to the motor, using "smart" control to avoid current
+                // spikes
+                .smartCurrentLimit((int) DriveConstants.currentLimit.in(Amps))
+                // Brake when 0 velocity is set
+                .idleMode(IdleMode.kBrake)
+                // Set PID and Max Motion constants
+                .closedLoopRampRate(DriveConstants.closedLoopRampRate.in(Seconds))
+                .openLoopRampRate(DriveConstants.openLoopRampRate.in(Seconds)).closedLoop
+                .pid(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD).maxMotion
+                .maxAcceleration(DriveConstants.maxAcceleration.in(RPMPerSecond))
+                .maxVelocity(DriveConstants.maxVelocity.in(RPM))
+                .allowedClosedLoopError(DriveConstants.allowedError);
 
-  //Set all motors to Brake / Coast mode
+        // Create configs that invert and setup followers as appropriate
+        rightLeaderConfig
+                .apply(globalConfig)
+                .inverted(true);
+        leftFollowerConfig
+                .apply(globalConfig)
+                .follow(leftLeader);
+        rightFollowerConfig
+                .apply(globalConfig)
+                .follow(rightLeader);
 
-  public void setBrakeMode(boolean brake) {
-    IdleMode mode = brake ? IdleMode.kBrake : IdleMode.kCoast;
-    setIdleMode(leftFront, leftBack, mode);
-    setIdleMode(rightFront, rightBack, mode);
-  }
+        // Apply configs
+        leftLeader.configure(globalConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        leftFollower.configure(leftFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rightLeader.configure(rightLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rightFollower.configure(rightFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-  // helper (reduces repitition)
-  private void setIdleMode(SparkMax m1, SparkMax m2, IdleMode mode) {
-    SparkMaxConfig config = new SparkMaxConfig();
-    config.idleMode(mode);
-    m1.configure(config, SparkMax.ResetMode.kNoResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters);
-    m2.configure(config, SparkMax.ResetMode.kNoResetSafeParameters, SparkMax.PersistMode.kNoPersistParameters);
-  }
+        // Get PID controller from leader motors
+        leftLeaderController = leftLeader.getClosedLoopController();
+        rightLeaderController = rightLeader.getClosedLoopController();
+
+        // Get encoder object references from leader motors
+        leftLeaderEncoder = leftLeader.getEncoder();
+        rightLeaderEncoder = rightLeader.getEncoder();
+
+        // Init the differential drive object that drive motor with the lambda functions
+        robotDriveController = new DifferentialDrive(
+                (leftOutput) -> setLeftVelocity(DriveConstants.maxMotorVelocity.times(leftOutput)),
+                (rightOutput) -> setRightVelocity(DriveConstants.maxMotorVelocity.times(rightOutput)));
+    }
+
+    // Sets the left motor velocity with PID control
+    public void setLeftVelocity(AngularVelocity desiredVelocity) {
+        // Calculate feed forward with WPI Lib method
+        Voltage arbFF = Volts.of(velocityFeedforward.calculate(desiredVelocity.in(RPM)));
+
+        // Drive left motors with Max Motion
+        leftLeaderController.setReference(desiredVelocity.in(RPM), ControlType.kMAXMotionVelocityControl,
+                ClosedLoopSlot.kSlot0, arbFF.in(Volts));
+    }
+
+    // Sets the right motor velocity with PID control
+    public void setRightVelocity(AngularVelocity desiredVelocity) {
+        // Calculate feed forward with WPI Lib method
+        Voltage arbFF = Volts.of(velocityFeedforward.calculate(desiredVelocity.in(RPM)));
+
+        // Drive right motors with Max Motion
+        rightLeaderController.setReference(desiredVelocity.in(RPM), ControlType.kMAXMotionVelocityControl,
+                ClosedLoopSlot.kSlot0, arbFF.in(Volts));
+    }
+
+    // Gets the left velocity with left leader encoders
+    public double getLeftVelocityRPM() {
+        return leftLeaderEncoder.getVelocity();
+    }
+
+    // Gets the right velocity with left leader encoders
+    public double getRightVelocityRPM() {
+        return rightLeaderEncoder.getVelocity();
+    }
+
+    // Return a tank drive command mode where each stick controls either side of the
+    // motor. NOTE: robotDriveController.tankDrive squares the input
+    public Command tankDrive(DoubleSupplier left, DoubleSupplier right) {
+        return this.run(() -> {
+            robotDriveController.tankDrive(left.getAsDouble(), right.getAsDouble());
+        });
+    }
+
+    // Return an arcade drive command mode where one stick controls velocity and one
+    // controls rotation NOTE: robotDriveController.arcadeDrive squares the input
+    public Command arcadeDrive(DoubleSupplier velocity, DoubleSupplier rotation) {
+        return this.run(() -> {
+            robotDriveController.arcadeDrive(velocity.getAsDouble(), rotation.getAsDouble());
+        });
+    }
+
 }
