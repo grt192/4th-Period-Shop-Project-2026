@@ -58,10 +58,10 @@ public class PivotSubsystem extends SubsystemBase {
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     // Use CANcoder as feedback source
-    config.Feedback.FeedbackRemoteSensorID = PivotConstants.ENCODER_ID;
-    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    config.Feedback.RotorToSensorRatio = PivotConstants.GEAR_RATIO;
-    config.Feedback.SensorToMechanismRatio = 1.0;
+    // config.Feedback.FeedbackRemoteSensorID = PivotConstants.ENCODER_ID;
+    // config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    // config.Feedback.RotorToSensorRatio = PivotConstants.GEAR_RATIO;
+    // config.Feedback.SensorToMechanismRatio = 1.0;
 
     // Torque current limits
     config.TorqueCurrent.PeakForwardTorqueCurrent = PivotConstants.PIVOT_MAX_CURRENT;
@@ -118,14 +118,24 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
 
-  public void setPosition(double rotations) {
+  boolean flipFlop = false;
+  public void intakePos() {
     // No position clamping - full range of motion
 
     // Encoder is on the pivot point (not affected by gear ratio)
     // Motor must rotate more due to gear ratio (motor_rotations = encoder_rotations * gear_ratio)
-    double motorRotations = rotations * PivotConstants.GEAR_RATIO;
+    if (flipFlop == true){
+    leftKraken.setControl(positionControl.withPosition(SmartDashboard.getNumber("intakePos", PivotConstants.PIVOT_INTAKE_POS)));
+    flipFlop = false;
+    }
+  }
 
-    leftKraken.setControl(positionControl.withPosition(motorRotations));
+  public void outtakePos() {
+    if (flipFlop == false){
+
+      leftKraken.setControl(positionControl.withPosition(SmartDashboard.getNumber("outtakePos", PivotConstants.PIVOT_OUTTAKE_POS)));
+      flipFlop = true;
+    }
   }
 
  /**

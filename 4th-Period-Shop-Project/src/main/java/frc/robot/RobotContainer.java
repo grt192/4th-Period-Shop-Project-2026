@@ -71,6 +71,13 @@ public class RobotContainer {
     driverController.L1().whileTrue(
       new RunCommand(()-> intakeSubsystem.downPos(), intakeSubsystem)
     );
+    driverController.cross().whileTrue(
+      new RunCommand(()-> pivotSubsystem.intakePos(), pivotSubsystem)
+    );
+    driverController.square().whileTrue(
+      new RunCommand(()-> pivotSubsystem.outtakePos(), pivotSubsystem)
+    );
+
 }
   private void configureDefaultCommands() {
     // Drive base utilizes tank drive controls

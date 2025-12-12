@@ -76,7 +76,9 @@ public final class Constants {
     public static final double PIVOT_MAX_CURRENT = 80.0;   // Maximum torque current (amps)
     public static final double PIVOT_CURRENT_LIMIT = 80.0; // Stator current limit (amps)
     public static final double PIVOT_SUPPLY_CURRENT_LIMIT = 40.0; // Supply current limit (amps)
-  
+    public static final double PIVOT_INTAKE_POS = 40.0; // Supply current limit (amps)
+    public static final double PIVOT_OUTTAKE_POS = 40.0; // Supply current limit (amps)
+
     // Angle limits (in rotations - relative encoder range)
     public static final double MIN_ANGLE = 0.0;   // Minimum position / stowed
     public static final double MAX_ANGLE = 0.14;  // Maximum position / fully raised
