@@ -88,8 +88,8 @@ public final class Constants {
     public static final double POSITION_TOLERANCE = 0.01;  // Tolerance in rotations
   }
   public static final class PneumaticsConstants {
-    public static final int pneumaticForwardChannel = 1;   // Forward solenoid channel on PCM (0-7)
-    public static final int pneumaticReverseChannel = 2;   // Reverse solenoid channel on PCM (0-7)
+    public static final int pneumaticForwardChannel = 6;   // Forward solenoid channel on PCM (0-7)
+    public static final int pneumaticReverseChannel = 7;   // Reverse solenoid channel on PCM (0-7)
     public static final int pneumaticCANId = 10;           // PCM CAN ID (commonly 10-19)
   }
   
