@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants.ServoConstants;
 //import frc.robot.Constants.OIConstants;
@@ -64,11 +65,11 @@ public class RobotContainer {
 
     //SERVO: R1 open (counterclockwise to 120°), L1 close (back to home 0°)
     driverController.R1().whileTrue(
-      new ManualServo(intakeSubsystem, ServoConstants.INTAKE_SPEED)
+      new RunCommand(()-> intakeSubsystem.upPos(), intakeSubsystem)
     );
 
     driverController.L1().whileTrue(
-      new ManualServo(intakeSubsystem, -ServoConstants.INTAKE_SPEED)
+      new RunCommand(()-> intakeSubsystem.downPos(), intakeSubsystem)
     );
 }
   private void configureDefaultCommands() {
@@ -85,4 +86,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }
+
 }

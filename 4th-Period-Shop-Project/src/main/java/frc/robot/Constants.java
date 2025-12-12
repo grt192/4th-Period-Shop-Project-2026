@@ -100,7 +100,7 @@ public final class Constants {
 
     // Servo positions: 0° = 0.0, 120° = 0.67 (assuming 180° servo range)
     public static final double HOME_POSITION = 0.0; // 0 degrees - boot position
-    public static final double OPEN_POSITION = 0.67; // 120 degrees counterclockwise
+    public static final double OPEN_POSITION = 67; // 120 degrees counterclockwise
 
     public static final double MAX_POSITION = 1.0;
     public static final double MIN_POSITION = 0.0;
