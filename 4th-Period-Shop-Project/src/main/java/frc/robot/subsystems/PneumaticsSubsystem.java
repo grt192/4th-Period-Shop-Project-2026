@@ -22,6 +22,7 @@ public class PneumaticsSubsystem extends SubsystemBase {
      * If extended, it'll retract & if retracted, it'll extend.
      */
     public void togglePneumatic() {
+        System.out.println("togglePneumatic");
         doubleSolenoid.toggle();
     }
     public void extend() {
