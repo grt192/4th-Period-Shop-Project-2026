@@ -42,12 +42,13 @@ public class StopperServo extends SubsystemBase{
     public double currentPosition() {
         return intakeServo.getPosition();
     }
+
     public void upPos(){
-        intakeServo.setPosition(SmartDashboard.getNumber("servoUpPos", 0));
+        intakeServo.setAngle(SmartDashboard.getNumber("servoUpPos", ServoConstants.OPEN_POSITION));
 
     }
     public void downPos(){
-        intakeServo.setPosition(SmartDashboard.getNumber("servoDownPos", 0));
+        intakeServo.setAngle(SmartDashboard.getNumber("servoDownPos", ServoConstants.HOME_POSITION));
 
     }
 
