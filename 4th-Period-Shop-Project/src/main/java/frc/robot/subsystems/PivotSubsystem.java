@@ -170,15 +170,16 @@ public class PivotSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Pivot/Current Position", getPosition());
     SmartDashboard.putNumber("Pivot/Motor Voltage", leftKraken.getMotorVoltage().getValueAsDouble());
 
-    if (atForwardSoftLimit() && speed > 0) {
-      speed = 0;
-    } else if (atReverseSoftLimit() && speed < 0) {
-      speed = 0;
-    }
+    // if (atForwardSoftLimit() && speed > 0) {
+    //   speed = 0;
+    // } else if (atReverseSoftLimit() && speed < 0) {
+    //   speed = 0;
+    // }
 
     // Command duty cycle to leader motor (leftKraken) - no limits
-    leftKraken.setControl(dutyCycleControl.withOutput(speed));
+    leftKraken.setControl(dutyCycleControl.withOutput(speed*0.5));
   }
+   
 
   // Set motor output to zero & stop all movement
   public void stop() {

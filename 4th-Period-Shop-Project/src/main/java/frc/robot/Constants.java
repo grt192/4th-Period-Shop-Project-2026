@@ -93,7 +93,7 @@ public final class Constants {
   }
 
   public static final class PneumaticsConstants {
-    public static final int pneumaticForwardChannel = 6; // Forward solenoid channel on PCM (0-7)
+    public static final int pneumaticForwardChannel = 7; // Forward solenoid channel on PCM (0-7)
     public static final int pneumaticReverseChannel = 7; // Reverse solenoid channel on PCM (0-7)
     public static final int pneumaticCANId = 5; // PCM CAN ID (commonly 10-19)
   }

@@ -64,18 +64,18 @@ public class RobotContainer {
       //new PositionServo(intakeSubsystem, ServoConstants.OPEN_POSITION) );
 
     //SERVO: R1 open (counterclockwise to 120°), L1 close (back to home 0°)
-    driverController.R1().whileTrue(
-      new RunCommand(()-> intakeSubsystem.upPos(), intakeSubsystem)
+    driverController.R1().onTrue(
+      new InstantCommand(()-> intakeSubsystem.upPos(), intakeSubsystem)
     );
 
-    driverController.L1().whileTrue(
-      new RunCommand(()-> intakeSubsystem.downPos(), intakeSubsystem)
+    driverController.L1().onTrue(
+      new InstantCommand(()-> intakeSubsystem.downPos(), intakeSubsystem)
     );
-    driverController.cross().whileTrue(
-      new RunCommand(()-> pivotSubsystem.intakePos(), pivotSubsystem)
+    driverController.cross().onTrue(
+      new InstantCommand(()-> pivotSubsystem.intakePos(), pivotSubsystem)
     );
-    driverController.square().whileTrue(
-      new RunCommand(()-> pivotSubsystem.outtakePos(), pivotSubsystem)
+    driverController.square().onTrue(
+      new InstantCommand(()-> pivotSubsystem.outtakePos(), pivotSubsystem)
     );
 
 }

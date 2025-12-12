@@ -70,6 +70,7 @@ public class StopperServo extends SubsystemBase{
             return;
         }
     
+        
         // Apply new position
         setPosition(newPosition);
 }
