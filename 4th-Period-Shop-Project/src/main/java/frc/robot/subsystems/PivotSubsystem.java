@@ -136,11 +136,11 @@ public class PivotSubsystem extends SubsystemBase {
   boolean flipFlop = false;
   public void intakePos() {
     // No position clamping - full range of motion
-    if (rotations > PivotConstants.MAX_ANGLE) {
-      rotations = PivotConstants.MAX_ANGLE;
-    } else if (rotations < PivotConstants.MIN_ANGLE) {
-      rotations = PivotConstants.MIN_ANGLE;
-    }
+    // if (rotations > PivotConstants.MAX_ANGLE) {
+    //   rotations = PivotConstants.MAX_ANGLE;
+    // } else if (rotations < PivotConstants.MIN_ANGLE) {
+    //   rotations = PivotConstants.MIN_ANGLE;
+    // }
 
     // Encoder is on the pivot point (not affected by gear ratio)
     // Motor must rotate more due to gear ratio (motor_rotations = encoder_rotations * gear_ratio)
