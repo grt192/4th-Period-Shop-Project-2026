@@ -47,8 +47,9 @@ public static final class PivotConstants {
   public static final double POSITION_TOLERANCE = 1.5;
 }
 public static final class PneumaticsConstants {
-  public static final int pneumaticID = 0;
-  public static final int pneumaticCANId = 10;
+  public static final int pneumaticForwardChannel = 6;
+  public static final int pneumaticReverseChannel = 7;
+  public static final int pneumaticCANId = 5;
 }
 
 public static final class ServoConstants {
