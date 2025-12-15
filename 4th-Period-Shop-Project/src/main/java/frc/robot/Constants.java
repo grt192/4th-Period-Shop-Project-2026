@@ -47,12 +47,12 @@ public final class Constants {
     public static final float kV = 473; // RPM / V
     public static final float kS = 0.0f; // V
 
-    public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(150);
-    public static final AngularVelocity maxVelocity = RPM.of(3000);
-    public static final double allowedError = 0.0; // lowk idk the units
-    public static final AngularVelocity maxMotorVelocity = RPM.of(3000);
+    public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(1050);
+    public static final AngularVelocity maxVelocity = RPM.of(30000);
+    public static final double allowedError = 1; // lowk idk the units
+    public static final AngularVelocity maxMotorVelocity = RPM.of(30000);
 
-    public static final Current currentLimit = Amps.of(50);
+    public static final Current currentLimit = Amps.of(100);
     public static final Time closedLoopRampRate = Seconds.of(0.05);
     public static final Time openLoopRampRate = Seconds.of(0.1);
   }
@@ -64,7 +64,7 @@ public final class Constants {
     public static final int PIVOT_MOTOR_RIGHT_ID = 2;
 
     // PID constants for TorqueCurrentFOC with 14:1 gear ratio
-    public static final double PIVOT_P = 0.1; // Proportional gain (torque in amps per rotation error)
+    public static final double PIVOT_P = 0.2; // Proportional gain (torque in amps per rotation error)
     public static final double PIVOT_I = 0.0; // Integral
     public static final double PIVOT_D = 0.0; // Derivative
     public static final double PIVOT_KG = 0.0; // Gravity feedforward (torque in amps to counteract gravity)
@@ -102,8 +102,8 @@ public final class Constants {
     public static final int SERVO_ID = 9; // PWM channel (0-9), changed from 0 to avoid DIO conflict
 
     // Servo positions: 0° = 0.0, 120° = 0.67 (assuming 180° servo range)
-    public static final double HOME_POSITION = 0.0; // 0 degrees - boot position
-    public static final double OPEN_POSITION = 67; // 120 degrees counterclockwise
+    public static final double HOME_POSITION = -10.0; // 0 degrees - boot position
+    public static final double OPEN_POSITION = 37; // 120 degrees counterclockwise
 
     public static final double MAX_POSITION = 1.0;
     public static final double MIN_POSITION = 0.0;

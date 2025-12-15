@@ -82,9 +82,9 @@ public class RobotContainer {
   private void configureDefaultCommands() {
     // Drive base utilizes tank drive controls
     driveSubsystem.setDefaultCommand(
-      driveSubsystem.tankDrive(
-          () -> -driverController.getRightY(),
-          () -> -driverController.getLeftY()));
+      driveSubsystem.arcadeDrive(
+          () -> -driverController.getLeftY()*.75,
+          () -> -driverController.getRightX()*.75));
 
     // Pivot Configs: R2 spins positive and L2 spins negative
     pivotSubsystem.setDefaultCommand(
