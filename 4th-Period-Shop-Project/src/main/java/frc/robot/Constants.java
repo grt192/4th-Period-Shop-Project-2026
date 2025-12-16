@@ -47,14 +47,14 @@ public final class Constants {
     public static final float kV = 473; // RPM / V
     public static final float kS = 0.0f; // V
 
-    public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(1050);
-    public static final AngularVelocity maxVelocity = RPM.of(30000);
-    public static final double allowedError = 1; // lowk idk the units
-    public static final AngularVelocity maxMotorVelocity = RPM.of(30000);
+    public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(10000);
+    public static final AngularVelocity maxVelocity = RPM.of(6000); // NEO free speed ~5676 RPM
+    public static final double allowedError = 50; // RPM tolerance
+    public static final AngularVelocity maxMotorVelocity = RPM.of(6000);
 
     public static final Current currentLimit = Amps.of(100);
-    public static final Time closedLoopRampRate = Seconds.of(0.05);
-    public static final Time openLoopRampRate = Seconds.of(0.1);
+    public static final Time closedLoopRampRate = Seconds.of(0.02);
+    public static Time openLoopRampRate = Seconds.of(0.02);
   }
 
   public static final class PivotConstants {
@@ -74,7 +74,7 @@ public final class Constants {
     public static final int ENCODER_ID = 0;
 
     // Speed and current limits
-    public static final double PIVOT_MANUAL_SPEED = 0.06; // Manual control speed (0.0 to 1.0)
+    public static double PIVOT_MANUAL_SPEED = 0.06; // Manual control speed (0.0 to 1.0)
     public static final double PIVOT_MAX_CURRENT = 80.0; // Maximum torque current (amps)
     public static final double PIVOT_CURRENT_LIMIT = 80.0; // Stator current limit (amps)
     public static final double PIVOT_SUPPLY_CURRENT_LIMIT = 40.0; // Supply current limit (amps)
@@ -102,8 +102,8 @@ public final class Constants {
     public static final int SERVO_ID = 9; // PWM channel (0-9), changed from 0 to avoid DIO conflict
 
     // Servo positions: 0° = 0.0, 120° = 0.67 (assuming 180° servo range)
-    public static final double HOME_POSITION = -10.0; // 0 degrees - boot position
-    public static final double OPEN_POSITION = 37; // 120 degrees counterclockwise
+    public static double HOME_POSITION = -10.0; // 0 degrees - boot position
+    public static double OPEN_POSITION = 37; // 120 degrees counterclockwise
 
     public static final double MAX_POSITION = 1.0;
     public static final double MIN_POSITION = 0.0;

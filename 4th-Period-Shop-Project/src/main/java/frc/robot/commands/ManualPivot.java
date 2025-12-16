@@ -40,7 +40,7 @@ public class ManualPivot extends Command {
     // Get the current speed value from R2 and L2
     double speedValue = speedSupplier.getAsDouble();
     // Apply configured speed scaling for safer manual control
-    double scaledSpeed = speedValue * frc.robot.Constants.PivotConstants.PIVOT_MANUAL_SPEED;
+    double scaledSpeed = speedValue * pivotSubsystem.manualSpeed;
     pivotSubsystem.setManualSpeed(scaledSpeed);
   }
 

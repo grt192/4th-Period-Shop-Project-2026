@@ -6,6 +6,7 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 
 import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -21,6 +22,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -49,6 +52,26 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Custom unit used by SparkMax Library for angular acceleration
     private final AngularAccelerationUnit RPMPerSecond = RPM.per(Second);
+
+    private final ShuffleboardTab tab = Shuffleboard.getTab("Telemetry");
+    private final GenericEntry leftVelocityEntry = tab.add("Left Velocity", 0.0)
+        .withWidget("Number Slider")
+        .withProperties(java.util.Map.of(
+            "min", -6000.0,
+            "max", 6000.0
+        ))
+        .withPosition(0, 2)
+        .withSize(3, 1)
+        .getEntry();
+    private final GenericEntry rightVelocityEntry = tab.add("Right Velocity", 0.0)
+        .withWidget("Number Slider")
+        .withProperties(java.util.Map.of(
+            "min", -6000.0,
+            "max", 6000.0
+        ))
+        .withPosition(3, 2)
+        .withSize(3, 1)
+        .getEntry();
 
     public DriveSubsystem() {
         SparkMaxConfig globalConfig = new SparkMaxConfig();
@@ -148,6 +171,21 @@ public class DriveSubsystem extends SubsystemBase {
         return this.run(() -> {
             robotDriveController.arcadeDrive(velocity.getAsDouble(), rotation.getAsDouble());
         });
+    }
+
+    @Override
+    public void periodic() {
+        leftVelocityEntry.setDouble(getLeftVelocityRPM());
+        rightVelocityEntry.setDouble(getRightVelocityRPM());
+    }
+
+    // Update ramp rate dynamically
+    public void setRampRate(double seconds) {
+        SparkMaxConfig config = new SparkMaxConfig();
+        config.openLoopRampRate(seconds);
+
+        leftLeader.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        rightLeader.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
 }

@@ -94,4 +94,17 @@ public class RobotContainer {
     return Commands.print("No autonomous command configured");
   }
 
+  // Getter methods for subsystems
+  public DriveSubsystem getDriveSubsystem() {
+    return driveSubsystem;
+  }
+
+  public StopperServo getServoSubsystem() {
+    return intakeSubsystem;
+  }
+
+  public PivotSubsystem getPivotSubsystem() {
+    return pivotSubsystem;
+  }
+
 }

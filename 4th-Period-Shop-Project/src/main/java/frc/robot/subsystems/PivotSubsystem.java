@@ -35,6 +35,9 @@ public class PivotSubsystem extends SubsystemBase {
   // Position based torque current FOC control with PID
   private final PositionTorqueCurrentFOC positionControl = new PositionTorqueCurrentFOC(0);
 
+  // Tunable parameter
+  public double manualSpeed = PivotConstants.PIVOT_MANUAL_SPEED;
+
   public PivotSubsystem() {
     configMotors();
     configEncoder();

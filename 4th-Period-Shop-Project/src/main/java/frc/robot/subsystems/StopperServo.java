@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ServoConstants;
@@ -8,6 +11,18 @@ import frc.robot.Constants.ServoConstants;
 
 public class StopperServo extends SubsystemBase{
     private Servo intakeServo = new Servo(ServoConstants.SERVO_ID);
+
+    private final ShuffleboardTab tab = Shuffleboard.getTab("Telemetry");
+    private final GenericEntry servoEntry = tab.add("Servo", false)
+        .withWidget("Boolean Box")
+        .withPosition(2, 3)
+        .withSize(2, 2)
+        .getEntry();
+
+    // Tunable parameters
+    public double openPosition = ServoConstants.OPEN_POSITION;
+    public double intakeSpeed = ServoConstants.INTAKE_SPEED;
+
     public StopperServo() {
         // Boot at home position (0 degrees)
         goHome();
@@ -20,11 +35,11 @@ public class StopperServo extends SubsystemBase{
 
     // Set servo to open position (120 degrees counterclockwise)
     public void openIntake() {
-        intakeServo.setPosition(ServoConstants.OPEN_POSITION);
+        intakeServo.setPosition(openPosition);
     }
-    
+
     public boolean isOpen() {
-        return Math.abs(currentPosition() - ServoConstants.OPEN_POSITION) < ServoConstants.INTAKE_TOLERANCE;
+        return Math.abs(currentPosition() - openPosition) < ServoConstants.INTAKE_TOLERANCE;
     }
 
      /**
@@ -44,12 +59,11 @@ public class StopperServo extends SubsystemBase{
     }
 
     public void upPos(){
-        intakeServo.setAngle(SmartDashboard.getNumber("servoUpPos", ServoConstants.OPEN_POSITION));
-
+        intakeServo.setAngle(openPosition);
     }
-    public void downPos(){
-        intakeServo.setAngle(SmartDashboard.getNumber("servoDownPos", ServoConstants.HOME_POSITION));
 
+    public void downPos(){
+        intakeServo.setAngle(ServoConstants.HOME_POSITION);
     }
 
 
@@ -76,6 +90,6 @@ public class StopperServo extends SubsystemBase{
 }
     @Override
     public void periodic(){
-        
+        servoEntry.setBoolean(isOpen());
     }
 }
